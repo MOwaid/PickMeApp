@@ -3,9 +3,11 @@ package com.ais.pickmecab;
 import android.Manifest;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 
@@ -19,7 +21,6 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.HttpResponse;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -42,6 +43,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.gms.tasks.OnCompleteListener;
 
+
 import android.os.Looper;
 import android.util.Log;
 import android.view.View;
@@ -62,6 +64,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialog;
 
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -76,27 +79,21 @@ import androidx.appcompat.widget.Toolbar;
 
 import android.view.Menu;
 
-import org.json.JSONArray;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLConnection;
+
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
+
 import java.util.List;
 
 
 
 
-public class  MainActivity extends AppCompatActivity implements OnMapReadyCallback , TaskLoadedCallback {
+public class  MainActivity extends AppCompatActivity implements OnMapReadyCallback , TaskLoadedCallback  {
     private static final String TAG = "MainActivity";
     private AppBarConfiguration mAppBarConfiguration;
 
@@ -125,6 +122,8 @@ public class  MainActivity extends AppCompatActivity implements OnMapReadyCallba
     ArrayList markerPoints = new ArrayList();
     MarkerOptions origin, destination;
     private Polyline currentPolyline;
+
+
 
 
     @Override
@@ -369,8 +368,23 @@ public class  MainActivity extends AppCompatActivity implements OnMapReadyCallba
             }
         });*/
 
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+                mMessageReceiver, new IntentFilter("Booking_IDReciver"));
 
     }
+
+
+    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // Get extra data included in the Intent
+            String BookingID = intent.getStringExtra("BookingID");
+            fatchJob(BookingID);
+           // Bundle b = intent.getBundleExtra("Location");
+
+          //   Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+        }
+    };
 
     @Override
     protected void onResume() {
@@ -387,10 +401,15 @@ public class  MainActivity extends AppCompatActivity implements OnMapReadyCallba
 
         Bundle b = getIntent().getExtras();
         String  BookingID = ""; // or other values
-        if(b != null)
+        if(b != null) {
             BookingID = b.getString("BookingID");
 
+           fatchJob(BookingID);
+        }
+
     }
+
+
 
     @Override
     public void onPause() {
@@ -586,6 +605,68 @@ public class  MainActivity extends AppCompatActivity implements OnMapReadyCallba
     private void closeProgressDialog() {
         progressDialog.dismiss();
     }
+
+
+    public void fatchJob(String Booking_ID)
+    {
+        String sURL = "http://ec2-18-217-60-45.us-east-2.compute.amazonaws.com:8090/pickmecab/v1/api/bookings/" + Booking_ID;
+
+                //"https://maps.googleapis.com/maps/api/geocode/json?address="+strAddress+"&key="+getString(R.string.API_KEY);
+
+
+        RequestQueue requestQueue = Volley.newRequestQueue(this);
+
+        // Initialize a new JsonObjectRequest instance
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
+                Request.Method.GET,
+                sURL,
+                null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        // Do something with response
+                        //mTextView.setText(response.toString());
+
+                        // Process the JSON
+                        try {
+                            // Get the JSON array
+
+                            JSONObject userData = response.getJSONObject("data");
+                            if(userData !=null) {
+                                Notify_data.setCustomerName(userData.getJSONObject("customer").getString("firstName"));
+                                Notify_data.setM_placeName("New Job");
+                                Notify_data.setM_cPhone(userData.getJSONObject("customer").getString("phone"));
+                                Notify_data.setM_bPhone("07553349987");
+                                Notify_data.setM_duration(userData.getString("startTime"));
+                                Notify_data.setM_to(userData.getJSONObject("destinationAddress").getString("street"));
+                                Notify_data.setM_From(userData.getJSONObject("pickupAddress").getString("completeAddress"));
+
+                                sendMessage();
+                            }
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+
+                            //   return null;
+
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        // Do something when error occurred
+
+                        Log.e("Error", "Error at sign in : " + error.getMessage());
+                        // return null;
+                    }
+                }
+        );
+
+        // Add JsonObjectRequest to the RequestQueue
+        requestQueue.add(jsonObjectRequest);
+
+    }
     public void getLocationFromAddress(String strAddress, final boolean isTo){
 
 
@@ -656,49 +737,6 @@ public class  MainActivity extends AppCompatActivity implements OnMapReadyCallba
 
     // Add JsonObjectRequest to the RequestQueue
         requestQueue.add(jsonObjectRequest);
-
-
-
-
-                            // Connect to the URL using java's native library
-       /* URL url = new URL(sURL);
-        URLConnection request = url.openConnection();
-        request.connect();
-
-        String result = InputStreamReader((InputStream) request.getContent());
-        // Convert to a JSON object to print data
-        JSONObject jp = new JSONObject(result); //from
-        JSONObject location = jp.getJSONObject("location");
-       // JsonElement root = jp.parse(); //Convert the input stream to a json element
-        //JsonObject rootobj = root.getAsJsonObject(); //May be an array, may be an object.
-        //String zipcode = rootobj.get("zip_code").getAsString(); //just grab the zipcode
-
-*/
-/*
-
-        Geocoder coder = new Geocoder(this);
-        List<Address> address;
-        LatLng  p1 = null;
-
-        try {
-            address = coder.getFromLocationName(strAddress,5);
-            if (address==null) {
-                return null;
-            }
-            Address location=address.get(0);
-            location.getLatitude();
-            location.getLongitude();
-
-            p1 = new LatLng (location.getLatitude() * 1E6,
-                    location.getLongitude() * 1E6);
-
-            return p1;
-        }
-        catch (IOException ex) {
-
-            ex.printStackTrace();
-            return  null;
-        }*/
 
     }
 
@@ -787,19 +825,13 @@ public class  MainActivity extends AppCompatActivity implements OnMapReadyCallba
 
         LatLng toLatlng, fromlatLng;
         Context context = getApplicationContext();
-        CharSequence text = "Notification Updated!";
+        CharSequence text = "New Job Arrived!";
         int duration = Toast.LENGTH_SHORT;
 
         Toast toast = Toast.makeText(context, text, duration);
         toast.show();
 
-        Notify_data.setCustomerName("Arif Ahmed");
-        Notify_data.setM_placeName("Holborn Station");
-        Notify_data.setM_bPhone("07546067012");
-        Notify_data.setM_cPhone("07553349987");
-        Notify_data.setM_duration("3 min away");
-        Notify_data.setM_to("C76 extention phase 1/2 gulshan-e-hadeed karachi pakistan");
-        Notify_data.setM_From("C89 block 8 gulshan-e-iqbal karachi pakistan");
+
         openProgressDialog();
         getLocationFromAddress(Notify_data.getM_to(),true);
         getLocationFromAddress(Notify_data.getM_From(), false);

@@ -11,7 +11,9 @@ import android.net.Uri;
 import android.os.Build;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
+import android.os.Bundle;
 import android.util.Log;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
@@ -79,6 +81,10 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             if (/* Check if data needs to be processed by long running job */ true) {
                 // For long-running tasks (10 seconds or more) use WorkManager.
                // scheduleJob();
+
+                String BookingID = remoteMessage.getData().get("booking-id").toString();
+
+                sendMessageToActivity(BookingID);
             } else {
                 // Handle message within 10 seconds
                 handleNow();
@@ -96,7 +102,12 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     }
     // [END receive_message]
 
-
+    private void sendMessageToActivity(String Booking_ID) {
+        Intent intent = new Intent("Booking_IDReciver");
+        // You can also include some extra data.
+        intent.putExtra("BookingID", Booking_ID);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+    }
     // [START on_new_token]
 
     /**
