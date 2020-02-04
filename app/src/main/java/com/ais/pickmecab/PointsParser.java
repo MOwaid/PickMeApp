@@ -21,6 +21,14 @@ public class PointsParser extends AsyncTask<String, Integer, List<List<HashMap<S
     TaskLoadedCallback taskCallback;
     String directionMode = "driving";
 
+
+
+    String distance = "0";
+
+
+
+    String duration = "0.0";
+
     public PointsParser(Context mContext, String directionMode) {
         this.taskCallback = (TaskLoadedCallback) mContext;
         this.directionMode = directionMode;
@@ -51,11 +59,13 @@ public class PointsParser extends AsyncTask<String, Integer, List<List<HashMap<S
         return routes;
     }
 
+
     // Executes in UI thread, after the parsing process
     @Override
     protected void onPostExecute(List<List<HashMap<String, String>>> result) {
         ArrayList<LatLng> points;
         PolylineOptions lineOptions = null;
+
         // Traversing through all the routes
         for (int i = 0; i < result.size(); i++) {
             points = new ArrayList<>();
@@ -65,6 +75,17 @@ public class PointsParser extends AsyncTask<String, Integer, List<List<HashMap<S
             // Fetching all the points in i-th route
             for (int j = 0; j < path.size(); j++) {
                 HashMap<String, String> point = path.get(j);
+
+
+                if(j==0){    // Get distance from the list
+                    distance = (String)point.get("distance");
+                    continue;
+                }else if(j==1){ // Get duration from the list
+                    duration = (String)point.get("duration");
+                    continue;
+                }
+
+
                 double lat = Double.parseDouble(point.get("lat"));
                 double lng = Double.parseDouble(point.get("lng"));
                 LatLng position = new LatLng(lat, lng);
@@ -85,11 +106,14 @@ public class PointsParser extends AsyncTask<String, Integer, List<List<HashMap<S
         // Drawing polyline in the Google Map for the i-th route
         if (lineOptions != null) {
             //mMap.addPolyline(lineOptions);
-            taskCallback.onTaskDone(lineOptions);
+            Log.d("mylog", duration + distance);
+            taskCallback.onTaskDone(lineOptions, duration, distance);
 
         } else {
             Log.d("mylog", "without Polylines drawn");
         }
     }
+
+
 }
 

@@ -31,18 +31,19 @@
                 android:id="@+id/text_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Heathrow Terminal 3 Arrival"
+                android:text="Waiting for job location ..."
 
                 android:textColor="#000000"
                 android:textSize="24sp"
                 android:textStyle="bold" />
+
             <TextView
                 android:id="@+id/text_cname"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="UnKnown"
+                android:text="Waiting ..."
 
-                android:textColor="#000000"
+                android:textColor="#6D80F1"
                 android:textSize="16sp"
                 android:textStyle="bold" />
 
@@ -117,7 +118,6 @@
                 android:id="@+id/text_time"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="12 min away"
                 android:textColor="#5692F5" />
 
             <View
@@ -138,7 +138,7 @@
         android:layout_margin="8dp"
         android:drawableLeft="@drawable/ic_action_location"
         android:drawablePadding="16dp"
-        android:text="Terminal 3, Compass Centre Nelson Rd, Longford, Hounslow TW6 1QG, UK" />
+        android:text="Job location waiting ..." />
 
 
     <TextView
@@ -148,7 +148,7 @@
         android:layout_margin="8dp"
         android:drawableLeft="@drawable/ic_action_local_phone"
         android:drawablePadding="16dp"
-        android:text="(415) 349-0942" />
+        android:text="Waiting ..." />
 
     <TextView
         android:id="@+id/text_duration"
@@ -157,7 +157,7 @@
         android:layout_margin="8dp"
         android:drawableLeft="@drawable/ic_action_access_time"
         android:drawablePadding="16dp"
-        android:text="Wed, 10 AM - 11 AM" />
+        android:text="Waiting ..." />
 
     <LinearLayout
         android:layout_width="fill_parent"
@@ -166,23 +166,28 @@
         android:orientation="horizontal"
         android:layout_weight="0">
 
-    <Button
-        android:id="@+id/btn_accept_ride"
-        android:layout_width="0.0dip" android:layout_height="fill_parent"
-        android:layout_marginTop="16dp"
-        android:background="#000"
-        android:text="Accept RIDE"
-        android:textColor="#fff"
-        android:layout_weight="1.0"/>
+        <Button
+            android:id="@+id/btn_accept_ride"
+            android:layout_width="0.0dip"
+            android:layout_height="fill_parent"
+            android:layout_marginTop="16dp"
+            android:layout_weight="1.0"
+            android:background="#000"
+            android:text="Accept RIDE"
+            android:textColor="#fff"
+            android:visibility="invisible" />
+
         <Button
             android:id="@+id/btn_reject_ride"
-            android:layout_width="0.0dip" android:layout_height="fill_parent"
-            android:layout_marginTop="16dp"
+            android:layout_width="0.0dip"
+            android:layout_height="fill_parent"
             android:layout_marginLeft="4dp"
+            android:layout_marginTop="16dp"
+            android:layout_weight="1.0"
             android:background="#250"
             android:text="REJECT RIDE"
             android:textColor="#fff"
-            android:layout_weight="1.0"/>
+            android:visibility="invisible" />
     </LinearLayout>
 
 </LinearLayout>

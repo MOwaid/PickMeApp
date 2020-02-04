@@ -16,7 +16,7 @@ public class SplashActivity extends AppCompatActivity {
 
     public static SharedPreferences sh;
     public static SharedPreferences.Editor editor;
-    public static String str_login_test;
+    public static String str_login_test,str_Deriver_ID;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -25,15 +25,17 @@ public class SplashActivity extends AppCompatActivity {
         String BookingID = "";
         Boolean isBooking_id_found = false;
         super.onCreate(savedInstanceState);
+
         // here initializing the shared preference
         sh = getSharedPreferences("myprefe", 0);
         editor = sh.edit();
-
+      // editor.clear();
+      //  editor.commit();
         // check here if user is login or not
         str_login_test = sh.getString("loginTest", null);
-
+        str_Deriver_ID = sh.getString("Driver_db_id",null);
         if (str_login_test != null
-                && !str_login_test.toString().trim().equals("")) {
+                && !str_login_test.toString().trim().equals("") && str_Deriver_ID != null &&  !str_Deriver_ID.toString().trim().equals("")) {
             if (getIntent().getExtras() != null) {
                 for (String key : getIntent().getExtras().keySet()) {
                     String value = getIntent().getExtras().getString(key);

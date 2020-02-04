@@ -10,7 +10,6 @@
 
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
-        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/overview_coordinator_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -18,38 +17,112 @@
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".MapFragment">
+        tools:context=".MapFragment"
+        app:layout_dodgeInsetEdges="bottom">
         <fragment
             android:id="@+id/map"
             android:name="com.google.android.gms.maps.SupportMapFragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+
             tools:context=".MapsActivity">
 
-            <Button
-                android:id="@+id/button2"
+            <Switch
+                android:id="@+id/action_status"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="right|center"
-                android:text="Load Job"
-                android:padding="10dp"
-                android:layout_marginTop="20dp"
-                android:onClick="sendMessage"
-                android:paddingRight="10dp"/>
+                android:layout_gravity="top|right"
+                android:layout_marginTop="60dp"
+                android:checked="true"
+                android:paddingRight="10dp"
+                android:switchMinWidth="40dp"
+                android:text="Online:"
+                android:textColor="#00010E"
+                android:textOff="OFF"
+                android:textOn="ON"
+                android:textSize="18sp"
+                android:textStyle="bold" />
 
-
-
-            <Button
-                android:id="@+id/btn_bottom_sheet"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal"
                 android:layout_gravity="bottom|center"
-                android:layout_marginTop="16dp"
-                android:background="@color/colorPrimary"
-                android:paddingLeft="16dp"
-                android:paddingRight="16dp"
-                android:text="Refresh Job"
-                android:textColor="@color/white" />
+                android:paddingBottom="20dp"
+                android:layout_weight="0">
+
+                <Button
+                    android:id="@+id/button2"
+                    android:layout_width="0.0dip"
+                    android:layout_height="fill_parent"
+
+                    android:layout_weight="1.0"
+                    android:background="#000"
+                    android:onClick="sendMessage"
+                    android:text="Start Ride"
+                    android:textColor="#fff"
+                    android:visibility="gone" />
+
+                <Button
+                    android:id="@+id/btn_Ride_end"
+                    android:layout_width="0.0dip"
+                    android:layout_height="fill_parent"
+
+                    android:layout_weight="1.0"
+                    android:background="#8BC34A"
+                    android:text="End Ride"
+                    android:textColor="#fff"
+                    android:visibility="gone" />
+
+                <Button
+                    android:id="@+id/btn_POB"
+                    android:layout_width="0.0dip"
+                    android:layout_height="fill_parent"
+
+                    android:layout_weight="1.0"
+                    android:background="#000"
+                    android:text="Passenger OnBorad"
+                    android:textColor="#fff"
+                    android:visibility="gone" />
+
+                <Button
+                    android:id="@+id/btn_NOSHOW"
+                    android:layout_width="0.0dip"
+                    android:layout_height="fill_parent"
+
+
+                    android:layout_weight="1.0"
+                    android:background="#250"
+                    android:text="No Show"
+                    android:textColor="#fff"
+                    android:visibility="gone" />
+
+
+                <Button
+                    android:id="@+id/btn_drv_arrived"
+                    android:layout_width="0.0dip"
+                    android:layout_height="fill_parent"
+
+                    android:layout_weight="1.0"
+                    android:background="#000"
+                    android:text="Arrived"
+                    android:textColor="#fff"
+                    android:visibility="gone" />
+
+                <Button
+                    android:id="@+id/btn_bottom_sheet"
+                    android:layout_width="0.0dip"
+                    android:layout_height="fill_parent"
+
+                    android:layout_weight="1.0"
+                    android:background="#000"
+                    android:text="Waiting for Job"
+                    android:textColor="#fff"
+                    android:visibility="visible" />
+
+
+            </LinearLayout>
 
 
 

@@ -94,6 +94,8 @@ public class LoginViewModel extends ViewModel {
                         loginResult.setValue(new LoginResult(new LoggedInUserView(user)));
                         SplashActivity.editor.putString("UserName", user);
                         SplashActivity.editor.putString("UserID", userID);
+                        SplashActivity.editor.putString("Driver_db_id", response.getString("userDbId"));
+                        SplashActivity.editor.putString("UserPwd", passWord);
                         SplashActivity.editor.commit();
                     }
                     else {
