@@ -85,6 +85,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 
 import java.util.List;
+import com.ais.pickmecab.Constant;
 
 
 
@@ -104,8 +105,8 @@ public class  MainActivity extends AppCompatActivity implements OnMapReadyCallba
     JSONObject Booking;
 
     ProgressDialog progressDialog;
-    public static SharedPreferences sh;
-    public static SharedPreferences.Editor editor;
+
+
     public static String str_login_test;
 
     BottomSheetBehavior sheetBehavior;
@@ -220,6 +221,21 @@ public class  MainActivity extends AppCompatActivity implements OnMapReadyCallba
                         Toast.makeText(MainActivity.this, msg, Toast.LENGTH_SHORT).show();
                     }
                 });
+
+        FirebaseMessaging.getInstance().subscribeToTopic(DriverID)
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        String msg = getString(R.string.msg_subscribed);
+                        if (!task.isSuccessful()) {
+                            msg = getString(R.string.msg_subscribe_failed);
+                        }
+                        Log.d(TAG, msg);
+                       // Toast.makeText(MainActivity.this, msg, Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+
         // [END subscribe_topics]
 
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
@@ -376,7 +392,7 @@ public class  MainActivity extends AppCompatActivity implements OnMapReadyCallba
                 // true if the switch is in the On position
                 if(isChecked) {
                     mySwitch.setText("Online");
-                    set_driver_status("Online");
+                    set_driver_status("ONLINE");
 
                 }
                 else {
@@ -591,7 +607,7 @@ public void getDrvStatus(final String status)
 
     //http://localhost:8090/
 
-    String URL = "http://ec2-18-217-60-45.us-east-2.compute.amazonaws.com:8090/pickmecab/v1/api/drivers/"+userDbId;
+    String URL = Constant.WEB_API_PATH+"drivers/"+userDbId;
 
 
     // Initialize a new RequestQueue instance
@@ -693,7 +709,7 @@ public void getDrvStatus(final String status)
         }
 
         //http://localhost:8090/
-        String URL = "http://ec2-18-217-60-45.us-east-2.compute.amazonaws.com:8090/pickmecab/v1/api/drivers/";
+        String URL = Constant.WEB_API_PATH+"drivers/";
 
 
         // Initialize a new RequestQueue instance
@@ -1102,7 +1118,7 @@ public void set_driver_status(String  status)
         }
 
         //http://localhost:8090/
-        String URL = "http://ec2-18-217-60-45.us-east-2.compute.amazonaws.com:8090/pickmecab/v1/api/bookings/";
+        String URL = Constant.WEB_API_PATH+"bookings/";
 
 
         // Initialize a new RequestQueue instance
@@ -1169,21 +1185,19 @@ public void set_driver_status(String  status)
 
         //http://localhost:8090/
 
-        String URL = "http://ec2-18-217-60-45.us-east-2.compute.amazonaws.com:8090/pickmecab/v1/api/bookings/reject/"+Booking_ID;
+        String URL;
+
         switch(Accpet_reject)
         {
             case 1:
-                URL = "http://ec2-18-217-60-45.us-east-2.compute.amazonaws.com:8090/pickmecab/v1/api/bookings/accept/"+Booking_ID;
-                break;
-            case 0:
-                URL  = "http://ec2-18-217-60-45.us-east-2.compute.amazonaws.com:8090/pickmecab/v1/api/bookings/reject/"+Booking_ID;
+                URL = Constant.WEB_API_PATH+"bookings/accept/"+Booking_ID;
                 break;
             case 2:
-                URL  = "http://ec2-18-217-60-45.us-east-2.compute.amazonaws.com:8090/pickmecab/v1/api/bookings/complete/"+Booking_ID;
+                URL  = Constant.WEB_API_PATH+"bookings/complete/"+Booking_ID;
                 break;
-                default:
-                    URL = "http://ec2-18-217-60-45.us-east-2.compute.amazonaws.com:8090/pickmecab/v1/api/bookings/reject/"+Booking_ID;
-                    break;
+            default:
+                URL = Constant.WEB_API_PATH+"bookings/reject/"+Booking_ID;
+                  break;
 
         }
 
@@ -1213,7 +1227,7 @@ public void set_driver_status(String  status)
                             resObject = response.getJSONObject("data");
 
                           /*  if(Accpet_reject)
-                                UpdateDriverIDonJob(resObject,DriverID);*/
+                                UpdateDriverIDonJob(null,DriverID);*/
 
                             // Loop through the array elements
                          /*   for (int i = 0; i < array.length(); i++) {
@@ -1255,8 +1269,9 @@ public void set_driver_status(String  status)
 }
     public void fatchJob(String Booking_ID)
     {
-        String sURL = "http://ec2-18-217-60-45.us-east-2.compute.amazonaws.com:8090/pickmecab/v1/api/bookings/" + Booking_ID;
+        String sURL = Constant.WEB_API_PATH+"bookings/" + Booking_ID;
 
+        openProgressDialog();
                 //"https://maps.googleapis.com/maps/api/geocode/json?address="+strAddress+"&key="+getString(R.string.API_KEY);
 
 
@@ -1286,6 +1301,13 @@ public void set_driver_status(String  status)
                                 Notify_data.setM_duration(userData.getString("startTime"));
                                 Notify_data.setM_to(userData.getJSONObject("destinationAddress").getString("street"));
                                 Notify_data.setM_From(userData.getJSONObject("pickupAddress").getString("completeAddress"));
+                                Notify_data.setLat_fr(Double.parseDouble(userData.getJSONObject("pickupAddress").getString("latitude")));
+                                Notify_data.setLang_fr(Double.parseDouble(userData.getJSONObject("pickupAddress").getString("longitude")));
+                                Notify_data.setLat_to(Double.parseDouble(userData.getJSONObject("destinationAddress").getString("latitude")));
+                                Notify_data.setLang_to(Double.parseDouble(userData.getJSONObject("destinationAddress").getString("longitude")));
+
+                                CalculationByDistance( new LatLng(Notify_data.getLat_fr(),Notify_data.getLang_fr()),new LatLng(Notify_data.getLat_to(),Notify_data.getLang_to()));
+
 
                                 sendMessage();
                             }
@@ -1313,6 +1335,7 @@ public void set_driver_status(String  status)
         requestQueue.add(jsonObjectRequest);
 
     }
+    /*
     public void getLocationFromAddress(String strAddress){
 
 
@@ -1404,12 +1427,10 @@ public void set_driver_status(String  status)
                                 Notify_data.setLang_to(addressletlng.longitude);
                                 Notify_data.setLat_to(addressletlng.latitude);
 
-                                CalculationByDistance(addressletlng, new LatLng(Notify_data.getLat_fr(),Notify_data.getLang_fr()));
 
 
 
-                            update_bottom_shet(Notify_data, bottom_sheet);
-                            closeProgressDialog();
+
 
 
                         } catch (JSONException e) {
@@ -1435,7 +1456,7 @@ public void set_driver_status(String  status)
         requestQueue.add(jsonObjectRequest);
 
     }
-
+*/
 
     public double CalculationByDistance(LatLng StartP, LatLng EndP) {
         /*
@@ -1467,11 +1488,10 @@ public void set_driver_status(String  status)
 
          */
 
-        LatLng from = new LatLng(Notify_data.getLat_fr(), Notify_data.getLang_fr());
-        LatLng to = new LatLng(Notify_data.getLat_to(), Notify_data.getLang_to());
 
-        origin = new MarkerOptions().position(from).title("Pick Up");
-        destination = new MarkerOptions().position(to).title("Drop Off");
+
+        origin = new MarkerOptions().position(StartP).title("Pick Up");
+        destination = new MarkerOptions().position(EndP).title("Drop Off");
 
         new FetchURL(MainActivity.this).execute(getUrl(origin.getPosition(), destination.getPosition(), "driving"), "driving");
 
@@ -1534,7 +1554,6 @@ return 0;
 
     public void sendMessage() {
 
-        LatLng toLatlng, fromlatLng;
         Context context = getApplicationContext();
         CharSequence text = "New Job Arrived!";
         int duration = Toast.LENGTH_SHORT;
@@ -1543,9 +1562,8 @@ return 0;
         toast.show();
 
 
-        openProgressDialog();
-        getLocationFromAddress(Notify_data.getM_From());
-
+        update_bottom_shet(Notify_data, bottom_sheet);
+        closeProgressDialog();
 
       //  update_bottom_shet(Notify_data, bottom_sheet);
 
@@ -1625,8 +1643,12 @@ return 0;
 
 public void clearMapp()
 {
+    if(currentPolyline != null)
     currentPolyline.remove();
-    PointA.remove();
+    if (PointA != null ) {
+        PointA.remove();
+    }
+    if(PointB !=null)
     PointB.remove();
 }
     private void animateCarMove(final Marker marker, final LatLng beginLatLng, final LatLng endLatLng, final long duration) {

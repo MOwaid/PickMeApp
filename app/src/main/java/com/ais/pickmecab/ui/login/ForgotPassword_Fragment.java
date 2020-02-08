@@ -102,8 +102,7 @@ public class ForgotPassword_Fragment extends Fragment implements
         // First check if email id is not null else show error toast
         if (getEmailId.equals("") || getEmailId.length() == 0)
 
-            new CustomToast().Show_Toast(getActivity(), view,
-                    "Please enter your Email Id.");
+            new CustomToast().Show_Toast(getActivity(), view,"Please enter your Email Id.");
 
             // Check if email id is valid or not
         else if (!m.find())

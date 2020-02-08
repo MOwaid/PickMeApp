@@ -61,6 +61,7 @@ public class SplashActivity extends AppCompatActivity {
             startActivity(send);
             }
 
+
         /*
          * if user login test is false on oncreate then redirect the
          * user to login & registration page
