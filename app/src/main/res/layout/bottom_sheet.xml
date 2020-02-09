@@ -11,183 +11,183 @@
     app:behavior_peekHeight="10dp"
     app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
+  <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:orientation="horizontal">
+
+    <View
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="0" />
+
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:layout_weight="5"
+        android:orientation="vertical">
 
-        <View
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="0" />
+      <TextView
+          android:id="@+id/text_title"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:text="Waiting for job location ..."
 
-        <LinearLayout
-            android:layout_width="0dp"
+          android:textColor="#000000"
+          android:textSize="24sp"
+          android:textStyle="bold" />
+
+      <TextView
+          android:id="@+id/text_cname"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:text="Waiting ..."
+
+          android:textColor="#6D80F1"
+          android:textSize="16sp"
+          android:textStyle="bold" />
+
+      <LinearLayout
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_marginTop="8dp"
+          android:orientation="horizontal">
+
+        <!--            <android.support.v7.widget.AppCompatRatingBar
+                        style="@style/Base.Widget.AppCompat.RatingBar.Small"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:numStars="5"
+                        android:rating="4" />
+    -->
+        <TextView
+
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="5"
-            android:orientation="vertical">
+            android:text="From: " />
 
-            <TextView
-                android:id="@+id/text_title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Waiting for job location ..."
-
-                android:textColor="#000000"
-                android:textSize="24sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/text_cname"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Waiting ..."
-
-                android:textColor="#6D80F1"
-                android:textSize="16sp"
-                android:textStyle="bold" />
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:orientation="horizontal">
-
-    <!--            <android.support.v7.widget.AppCompatRatingBar
-                    style="@style/Base.Widget.AppCompat.RatingBar.Small"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:numStars="5"
-                    android:rating="4" />
--->
-                <TextView
-
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="From: " />
-
-                <TextView
-                    android:id="@+id/text_from"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="8dp"
-                    android:text="" />
+        <TextView
+            android:id="@+id/text_from"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            android:text="" />
 
 
 
-            </LinearLayout>
+      </LinearLayout>
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="0.5dp"
-                android:layout_marginTop="12dp"
-                android:layout_marginBottom="12dp"
-                android:background="#5d5d5d" />
+      <View
+          android:layout_width="match_parent"
+          android:layout_height="0.5dp"
+          android:layout_marginTop="12dp"
+          android:layout_marginBottom="12dp"
+          android:background="#5d5d5d" />
 
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:orientation="horizontal">
+      <LinearLayout
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_marginTop="8dp"
+          android:orientation="horizontal">
 
-                <TextView
+        <TextView
 
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="To: " />
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="To: " />
 
-                <TextView
-                    android:id="@+id/text_to"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="8dp"
-                    android:text="" />
+        <TextView
+            android:id="@+id/text_to"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            android:text="" />
 
 
 
-            </LinearLayout>
+      </LinearLayout>
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="0.5dp"
-                android:layout_marginTop="12dp"
-                android:layout_marginBottom="12dp"
-                android:background="#5d5d5d" />
+      <View
+          android:layout_width="match_parent"
+          android:layout_height="0.5dp"
+          android:layout_marginTop="12dp"
+          android:layout_marginBottom="12dp"
+          android:background="#5d5d5d" />
 
-            <TextView
-                android:id="@+id/text_time"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="#5692F5" />
+      <TextView
+          android:id="@+id/text_time"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:textColor="#5692F5" />
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="0.5dp"
-                android:layout_marginTop="12dp"
-                android:layout_marginBottom="12dp"
-                android:background="#5d5d5d" />
-
-        </LinearLayout>
+      <View
+          android:layout_width="match_parent"
+          android:layout_height="0.5dp"
+          android:layout_marginTop="12dp"
+          android:layout_marginBottom="12dp"
+          android:background="#5d5d5d" />
 
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/text_location"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        android:drawableLeft="@drawable/ic_action_location"
-        android:drawablePadding="16dp"
-        android:text="Job location waiting ..." />
+  </LinearLayout>
+
+  <TextView
+      android:id="@+id/text_location"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_margin="8dp"
+      android:drawableLeft="@drawable/ic_action_location"
+      android:drawablePadding="16dp"
+      android:text="Job location waiting ..." />
 
 
-    <TextView
-        android:id="@+id/text_cphone"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        android:drawableLeft="@drawable/ic_action_local_phone"
-        android:drawablePadding="16dp"
-        android:text="Waiting ..." />
+  <TextView
+      android:id="@+id/text_cphone"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_margin="8dp"
+      android:drawableLeft="@drawable/ic_action_local_phone"
+      android:drawablePadding="16dp"
+      android:text="Waiting ..." />
 
-    <TextView
-        android:id="@+id/text_duration"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        android:drawableLeft="@drawable/ic_action_access_time"
-        android:drawablePadding="16dp"
-        android:text="Waiting ..." />
+  <TextView
+      android:id="@+id/text_duration"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_margin="8dp"
+      android:drawableLeft="@drawable/ic_action_access_time"
+      android:drawablePadding="16dp"
+      android:text="Waiting ..." />
 
-    <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:orientation="horizontal"
-        android:layout_weight="0">
+  <LinearLayout
+      android:layout_width="fill_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="8dp"
+      android:orientation="horizontal"
+      android:layout_weight="0">
 
-        <Button
-            android:id="@+id/btn_accept_ride"
-            android:layout_width="0.0dip"
-            android:layout_height="fill_parent"
-            android:layout_marginTop="16dp"
-            android:layout_weight="1.0"
-            android:background="#000"
-            android:text="Accept RIDE"
-            android:textColor="#fff"
-            android:visibility="invisible" />
+    <Button
+        android:id="@+id/btn_accept_ride"
+        android:layout_width="0.0dip"
+        android:layout_height="fill_parent"
+        android:layout_marginTop="16dp"
+        android:layout_weight="1.0"
+        android:background="#000"
+        android:text="Accept RIDE"
+        android:textColor="#fff"
+        android:visibility="invisible" />
 
-        <Button
-            android:id="@+id/btn_reject_ride"
-            android:layout_width="0.0dip"
-            android:layout_height="fill_parent"
-            android:layout_marginLeft="4dp"
-            android:layout_marginTop="16dp"
-            android:layout_weight="1.0"
-            android:background="#250"
-            android:text="REJECT RIDE"
-            android:textColor="#fff"
-            android:visibility="invisible" />
-    </LinearLayout>
+    <Button
+        android:id="@+id/btn_reject_ride"
+        android:layout_width="0.0dip"
+        android:layout_height="fill_parent"
+        android:layout_marginLeft="4dp"
+        android:layout_marginTop="16dp"
+        android:layout_weight="1.0"
+        android:background="#250"
+        android:text="REJECT RIDE"
+        android:textColor="#fff"
+        android:visibility="invisible" />
+  </LinearLayout>
 
 </LinearLayout>
