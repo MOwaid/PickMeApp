@@ -61,7 +61,7 @@ public class CustomDialog  extends Dialog implements
         switch (v.getId()) {
             case R.id.Btn_YES:
                 sendMessageToActivity(Job.getBookingID());
-                
+
                 dismiss();
                 break;
             case R.id.Btn_NO:

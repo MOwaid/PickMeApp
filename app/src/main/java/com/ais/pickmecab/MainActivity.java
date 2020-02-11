@@ -1301,11 +1301,42 @@ public void set_driver_status(String  status)
                                 Notify_data.setM_duration(userData.getString("startTime"));
                                 Notify_data.setM_to(userData.getJSONObject("destinationAddress").getString("street"));
                                 Notify_data.setM_From(userData.getJSONObject("pickupAddress").getString("completeAddress"));
-                                Notify_data.setLat_fr(Double.parseDouble(userData.getJSONObject("pickupAddress").getString("latitude")));
-                                Notify_data.setLang_fr(Double.parseDouble(userData.getJSONObject("pickupAddress").getString("longitude")));
-                                Notify_data.setLat_to(Double.parseDouble(userData.getJSONObject("destinationAddress").getString("latitude")));
-                                Notify_data.setLang_to(Double.parseDouble(userData.getJSONObject("destinationAddress").getString("longitude")));
-
+                                String value = userData.getJSONObject("pickupAddress").getString("latitude");
+                                if(value != null && !value.equals("null"))
+                                Notify_data.setLat_fr(Double.parseDouble(value));
+                                else
+                                {
+                                    closeProgressDialog();
+                                    AlertError();
+                                    return;
+                                }
+                                value = userData.getJSONObject("pickupAddress").getString("longitude");
+                                if(value != null && !value.equals("null"))
+                                Notify_data.setLang_fr(Double.parseDouble(value));
+                                else
+                                {
+                                    closeProgressDialog();
+                                    AlertError();
+                                    return;
+                                }
+                                value = userData.getJSONObject("destinationAddress").getString("latitude");
+                                if(value != null && !value.equals("null"))
+                                Notify_data.setLat_to(Double.parseDouble(value));
+                                else
+                                {
+                                    closeProgressDialog();
+                                    AlertError();
+                                    return;
+                                }
+                                value = userData.getJSONObject("destinationAddress").getString("longitude");
+                                if(value != null && !value.equals("null"))
+                                    Notify_data.setLang_to(Double.parseDouble(value));
+                                else
+                                {
+                                    closeProgressDialog();
+                                    AlertError();
+                                    return;
+                                }
                                 CalculationByDistance( new LatLng(Notify_data.getLat_fr(),Notify_data.getLang_fr()),new LatLng(Notify_data.getLat_to(),Notify_data.getLang_to()));
 
 
@@ -1314,7 +1345,7 @@ public void set_driver_status(String  status)
 
                         } catch (JSONException e) {
                             e.printStackTrace();
-
+                            closeProgressDialog();
                             //   return null;
 
                         }
@@ -1327,6 +1358,8 @@ public void set_driver_status(String  status)
 
                         Log.e("Error", "Error at sign in : " + error.getMessage());
                         // return null;
+                        closeProgressDialog();
+
                     }
                 }
         );
@@ -1335,6 +1368,36 @@ public void set_driver_status(String  status)
         requestQueue.add(jsonObjectRequest);
 
     }
+
+    public void AlertError()
+    {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        builder.setTitle("Invalid job data");
+        builder.setMessage("This job details are invalid. Job can't be loaded please contact the base !");
+        builder.setPositiveButton("OK",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        Toast.makeText(getApplicationContext(),
+                                "Job was not loaded",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+        //setting the view of the builder to our custom view that we already inflated
+       // builder.setView(dialogView);
+
+        //finally creating the alert dialog and displaying it
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+/*
+        new AlertDialog.Builder(this)
+                .setTitle("Invalid job data")
+                .setMessage("This job details are invalid. Job can't be loaded please contact base !")
+                .setPositiveButton(android.R.string.ok, null)
+                .show();*/
+    }
+
     /*
     public void getLocationFromAddress(String strAddress){
 
