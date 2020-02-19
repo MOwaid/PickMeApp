@@ -24,6 +24,7 @@ import com.ais.pickmecab.Constant;
 import com.ais.pickmecab.CustomDialog;
 import com.ais.pickmecab.CustomListAdapter;
 import com.ais.pickmecab.ListItem;
+import com.ais.pickmecab.MainActivity;
 import com.ais.pickmecab.R;
 import com.ais.pickmecab.SplashActivity;
 import com.android.volley.Request;
@@ -38,6 +39,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -78,6 +80,8 @@ String DriverID = "";
         AssignedJobs = new ArrayList<>();
         DriverID = SplashActivity.sh.getString("Driver_db_id",null);
 
+
+        ((MainActivity)getActivity()).closesheet();
          progress = new ProgressDialog(getContext());
 
         datefrom = new Date();
@@ -139,7 +143,7 @@ String DriverID = "";
         AlertDialog alertDialog = builder.create();
         alertDialog.show();*/
 
-        CustomDialog cdd=new CustomDialog(getActivity(),job);
+        CustomDialog cdd=new CustomDialog(getActivity(),job, 0);
         cdd.show();
     }
 
@@ -150,14 +154,31 @@ String DriverID = "";
 
         try {
 
+            start_datetime = job.getString("startTime");
+
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZZZZZ");
+            Date strDate = sdf.parse(start_datetime);
+            Date Todatdate = new Date();
+            if (Todatdate.before(strDate) || Todatdate.equals(strDate) ) {
+
+
+
              customer = job.getJSONObject("customer").getString("firstName");
              from = job.getJSONObject("pickupAddress").getString("completeAddress");
              to = job.getJSONObject("destinationAddress").getString("street");
-             start_datetime = job.getString("startTime");
-             BookingID = job.getString("id");
 
+             BookingID = job.getString("id");
+            }
+            else
+            {
+                return ;
+            }
 
         } catch (JSONException e) {
+            progress.dismiss();
+            e.printStackTrace();
+        } catch (ParseException e) {
+            progress.dismiss();
             e.printStackTrace();
         }
 
@@ -228,8 +249,10 @@ String DriverID = "";
 
                             }catch (JSONException e){
                                 e.printStackTrace();
+                                progress.dismiss();
                             }
                         } catch (JSONException e) {
+                            progress.dismiss();
                             e.printStackTrace();
                         }
                     }
@@ -242,6 +265,7 @@ String DriverID = "";
 
                         Log.e("Error", "Error at sign in : " + error.getMessage());
                         // return null;
+                        progress.dismiss();
                     }
                 }
         );

@@ -44,7 +44,7 @@ public class LoginViewModel extends ViewModel {
         void onSuccess(JSONObject result);
     }
 
-    String URL = "http://ec2-18-217-60-45.us-east-2.compute.amazonaws.com:8090//pickmecab/v1/api/users/auth/";
+    String URL = "http://ec2-18-217-60-45.us-east-2.compute.amazonaws.com:8090/pickmecab/v1/api/users/auth/";
 
     private MutableLiveData<LoginFormState> loginFormState = new MutableLiveData<>();
     private MutableLiveData<LoginResult> loginResult = new MutableLiveData<>();

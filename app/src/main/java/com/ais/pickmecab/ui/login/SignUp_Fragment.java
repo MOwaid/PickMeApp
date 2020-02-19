@@ -154,7 +154,7 @@ public class SignUp_Fragment extends Fragment implements OnClickListener {
             // Check if both password should be equal
         else if (!getConfirmPassword.equals(getPassword))
             new CustomToast().Show_Toast(getActivity(), view,
-                    "Both password doesn't match.");
+                    "Both password don't match.");
 
             // Make sure user should check Terms and Conditions checkbox
         else if (!terms_conditions.isChecked())

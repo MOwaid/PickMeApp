@@ -175,9 +175,11 @@ public class Completed extends Fragment {
 
                             }catch (JSONException e){
                                 e.printStackTrace();
+                                progress.dismiss();
                             }
                         } catch (JSONException e) {
                             e.printStackTrace();
+                            progress.dismiss();
                         }
                     }
 
@@ -189,6 +191,7 @@ public class Completed extends Fragment {
 
                         Log.e("Error", "Error at sign in : " + error.getMessage());
                         // return null;
+                        progress.dismiss();
                     }
                 }
         );

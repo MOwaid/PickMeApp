@@ -15,6 +15,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.ais.pickmecab.Constant;
+import com.ais.pickmecab.CustomDialog;
 import com.ais.pickmecab.CustomListAdapter;
 import com.ais.pickmecab.ListItem;
 import com.ais.pickmecab.R;
@@ -31,6 +32,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -76,6 +78,37 @@ public class Allocated extends Fragment {
 
     }
 
+    private void showCustomDialog(ListItem job) {
+        //before inflating the custom alert dialog layout, we will get the current activity viewgroup
+      /*  ViewGroup viewGroup = getActivity().findViewById(android.R.id.content);
+
+        //then we will inflate the custom alert dialog xml that we created
+        View dialogView = LayoutInflater.from(getContext()).inflate(R.layout.custom_dialog, viewGroup, false);
+
+
+        //Now we need an AlertDialog.Builder object
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+
+        builder.setPositiveButton("OK",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        Toast.makeText(getContext(),
+                                "OK was clicked",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+        //setting the view of the builder to our custom view that we already inflated
+        builder.setView(dialogView);
+
+        //finally creating the alert dialog and displaying it
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();*/
+
+        CustomDialog cdd=new CustomDialog(getActivity(),job, 1);
+        cdd.show();
+    }
+
     private void loadallJob()
     {
         ArrayList jobList = getListAssignJobs();
@@ -85,6 +118,7 @@ public class Allocated extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> a, View v, int position, long id) {
                 ListItem user = (ListItem) lv.getItemAtPosition(position);
+                showCustomDialog(user);
                 Toast.makeText(getActivity(), "Selected :" + " " + user.getName()+", "+ user.getLocation(), Toast.LENGTH_SHORT).show();
             }
         });
@@ -97,14 +131,31 @@ public class Allocated extends Fragment {
 
         try {
 
-            customer = job.getJSONObject("customer").getString("firstName");
-            from = job.getJSONObject("pickupAddress").getString("completeAddress");
-            to = job.getJSONObject("destinationAddress").getString("street");
             start_datetime = job.getString("startTime");
-            BookingID = job.getString("id");
+
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZZZZZ");
+            Date strDate = sdf.parse(start_datetime);
+            Date Todaydate = new Date();
+
+            if (strDate.after(Todaydate) || Todaydate.equals(strDate) ) {
+
+                customer = job.getJSONObject("customer").getString("firstName");
+                from = job.getJSONObject("pickupAddress").getString("completeAddress");
+                to = job.getJSONObject("destinationAddress").getString("street");
+
+                BookingID = job.getString("id");
+            }
+            else
+            {
+                return;
+            }
 
 
         } catch (JSONException e) {
+            progress.dismiss();
+            e.printStackTrace();
+        } catch (ParseException e) {
+            progress.dismiss();
             e.printStackTrace();
         }
 
@@ -172,9 +223,11 @@ public class Allocated extends Fragment {
                                 loadallJob();
 
                             }catch (JSONException e){
+                                progress.dismiss();
                                 e.printStackTrace();
                             }
                         } catch (JSONException e) {
+                            progress.dismiss();
                             e.printStackTrace();
                         }
                     }
@@ -184,7 +237,7 @@ public class Allocated extends Fragment {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         // Do something when error occurred
-
+                        progress.dismiss();
                         Log.e("Error", "Error at sign in : " + error.getMessage());
                         // return null;
                     }

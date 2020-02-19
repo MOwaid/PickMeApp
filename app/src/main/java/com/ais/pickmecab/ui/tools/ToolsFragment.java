@@ -1,5 +1,6 @@
 package com.ais.pickmecab.ui.tools;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,10 +14,15 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
 import com.ais.pickmecab.R;
+import com.ais.pickmecab.SplashActivity;
+
+
+
 
 public class ToolsFragment extends Fragment {
 
     private ToolsViewModel toolsViewModel;
+
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -28,8 +34,13 @@ public class ToolsFragment extends Fragment {
             @Override
             public void onChanged(@Nullable String s) {
                 textView.setText(s);
+
+
+
             }
         });
         return root;
     }
+
+
 }

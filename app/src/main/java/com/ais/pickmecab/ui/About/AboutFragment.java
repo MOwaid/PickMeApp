@@ -15,6 +15,9 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.ais.pickmecab.R;
+import com.ais.pickmecab.SplashActivity;
+
+import static com.ais.pickmecab.SplashActivity.editor;
 
 public class AboutFragment extends Fragment {
 
@@ -32,5 +35,14 @@ public class AboutFragment extends Fragment {
             }
         });
         return root;
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        editor = SplashActivity.sh.edit();
+        editor.clear();
+        editor.commit();
+        getActivity().finish();
     }
 }

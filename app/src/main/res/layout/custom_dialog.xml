@@ -6,7 +6,7 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="80dp"
+        android:layout_height="60dp"
         android:background="@color/colorPrimary">
 
         <ImageView
@@ -21,7 +21,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="10dp">
 
         <TextView
             android:id="@+id/txt_pickup"
@@ -86,6 +86,7 @@
         </LinearLayout>
 
         <TextView
+            android:id="@+id/dlg_msg"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
@@ -110,6 +111,18 @@
                 android:text="YES"
                 android:textColor="#fff"
                 android:visibility="visible" />
+
+            <Button
+                android:id="@+id/Btn_Reject"
+                android:layout_width="0.0dip"
+                android:layout_height="fill_parent"
+                android:layout_marginLeft="4dp"
+                android:layout_marginTop="16dp"
+                android:layout_weight="1.0"
+                android:background="#250"
+                android:text="Reject"
+                android:textColor="#fff"
+                android:visibility="gone" />
 
             <Button
                 android:id="@+id/Btn_NO"

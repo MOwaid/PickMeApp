@@ -66,6 +66,7 @@ public class SlideshowFragment extends Fragment {
 
 
 
+
         return root;
     }
 }

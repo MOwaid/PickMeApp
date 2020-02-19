@@ -12,7 +12,10 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
+import com.ais.pickmecab.MainActivity;
 import com.ais.pickmecab.R;
+import com.google.android.gms.maps.model.LatLng;
+
 
 public class ShareFragment extends Fragment {
 
@@ -28,8 +31,14 @@ public class ShareFragment extends Fragment {
             @Override
             public void onChanged(@Nullable String s) {
                 textView.setText(s);
+                LatLng location = new LatLng(51.000,21.000);
+                ((MainActivity)getActivity()).send_fcm_msg("DriverLocations",location ,"POB","YES");
             }
         });
+
         return root;
+
+
     }
+
 }

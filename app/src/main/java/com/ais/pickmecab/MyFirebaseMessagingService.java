@@ -81,10 +81,11 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
       if (/* Check if data needs to be processed by long running job */ true) {
         // For long-running tasks (10 seconds or more) use WorkManager.
         // scheduleJob();
+          if(remoteMessage.getData().get("booking-id") != null) {
+            String BookingID = remoteMessage.getData().get("booking-id").toString();
 
-        String BookingID = remoteMessage.getData().get("booking-id").toString();
-
-        sendMessageToActivity(BookingID);
+            sendMessageToActivity(BookingID);
+          }
       } else {
         // Handle message within 10 seconds
         handleNow();
@@ -106,6 +107,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     Intent intent = new Intent("Booking_IDReciver");
     // You can also include some extra data.
     intent.putExtra("BookingID", Booking_ID);
+    intent.putExtra("UpdateJob",2);
     LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
   }
   // [START on_new_token]

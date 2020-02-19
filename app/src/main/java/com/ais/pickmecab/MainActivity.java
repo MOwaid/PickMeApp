@@ -17,6 +17,8 @@ import android.location.Location;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+
+import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -48,6 +50,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 
 import android.os.Handler;
 import android.os.Looper;
+
 import android.os.SystemClock;
 import android.util.Log;
 import android.view.MenuItem;
@@ -56,6 +59,7 @@ import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
 import android.widget.Button;
 import android.widget.CompoundButton;
+
 import android.widget.LinearLayout;
 
 import android.widget.Switch;
@@ -64,10 +68,12 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.messaging.FirebaseMessaging;
+
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
-import com.google.android.material.bottomsheet.BottomSheetDialog;
+
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
@@ -84,13 +90,16 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import java.util.ArrayList;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 import com.ais.pickmecab.Constant;
 
+import com.google.firebase.messaging.RemoteMessage;
 
 
-
-public class  MainActivity extends AppCompatActivity implements OnMapReadyCallback , TaskLoadedCallback  {
+public class  MainActivity extends AppCompatActivity implements  OnMapReadyCallback, TaskLoadedCallback  {
     private static final String TAG = "MainActivity";
     private AppBarConfiguration mAppBarConfiguration;
 
@@ -104,6 +113,8 @@ public class  MainActivity extends AppCompatActivity implements OnMapReadyCallba
     JSONArray AllBooking;
     JSONObject Booking;
 
+    private boolean firstTimeFlag = true;
+
     ProgressDialog progressDialog;
 
 
@@ -112,6 +123,7 @@ public class  MainActivity extends AppCompatActivity implements OnMapReadyCallba
     BottomSheetBehavior sheetBehavior;
     LinearLayout bottom_sheet;
     Button btn_bottom_sheet, btn_bottom_sheet_dialog;
+    FloatingActionButton fab;
 
     Button btn_Accept_Ride,btn_Reject_Ride;
     Button btn_begin_Ride, btn_End_Ride,btn_drv_arrived,btn_POB,btn_no_show;
@@ -131,7 +143,11 @@ public class  MainActivity extends AppCompatActivity implements OnMapReadyCallba
     Boolean JobinProgress = false;
     Menu item;
     String  BookingID=null;
-    String DriverID = null;
+    String FunctionType;
+    String DriverID = null, DriverStatus = "";
+    NavController navController;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -143,7 +159,19 @@ public class  MainActivity extends AppCompatActivity implements OnMapReadyCallba
         getSupportActionBar().setDisplayShowTitleEnabled(true);
 
         toolbar.setTitle("my title");
-        FloatingActionButton fab = findViewById(R.id.Nav);
+
+      /*  ImageButton btnNav = findViewById(R.id.NavBtn);
+        btnNav.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+
+
+                if (DriverGuider !=null)
+                    loadNavigationView(DriverGuider);
+            }
+        });*/
+
+
+         fab = findViewById(R.id.Nav);
         fab.setImageResource(R.drawable.direction_icon);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -154,6 +182,20 @@ public class  MainActivity extends AppCompatActivity implements OnMapReadyCallba
 
             }
         });
+
+
+        // get the bottom sheet view
+        bottom_sheet = findViewById(R.id.bottom_sheet);
+        // init the bottom sheet behavior
+        sheetBehavior = BottomSheetBehavior.from(bottom_sheet);
+
+        btn_bottom_sheet = findViewById(R.id.btn_bottom_sheet);
+        //  btn_bottom_sheet_dialog = findViewById(R.id.btn_bottom_sheet_dialog);
+
+        btn_Accept_Ride = bottom_sheet.findViewById(R.id.btn_accept_ride);
+        btn_Reject_Ride = bottom_sheet.findViewById(R.id.btn_reject_ride);
+
+
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
         // Passing each menu ID as a set of Ids because each
@@ -163,9 +205,35 @@ public class  MainActivity extends AppCompatActivity implements OnMapReadyCallba
                 R.id.nav_tools, R.id.nav_share, R.id.nav_send, R.id.nav_about)
                 .setDrawerLayout(drawer)
                 .build();
-        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
+         navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
+
+
+    /*    NavigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+
+            @Override
+            public boolean onNavigationItemSelected(MenuItem menuItem) {
+                menuItem.setChecked(true);
+               bottom_sheet.setVisibility(View.GONE);
+              /*  switch (menuItem.getItemId()) {
+                    case R.id.navItem1:
+                        Intent alarm = new Intent(AlarmClock.ACTION_SET_ALARM);
+                        startActivity(alarm);
+                        break;
+                    case R.id.navItem2:
+                        try {
+                            export();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        break;
+                }
+                return false;
+            }
+        });*/
+
+
 
         Notify_data = new NotificationDataParser();
         JobinProgress = false;
@@ -236,6 +304,7 @@ public class  MainActivity extends AppCompatActivity implements OnMapReadyCallba
                 });
 
 
+       // FirebaseMessaging.getInstance().send();
         // [END subscribe_topics]
 
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
@@ -245,16 +314,6 @@ public class  MainActivity extends AppCompatActivity implements OnMapReadyCallba
         checkLocationPermission();
 
 
-        // get the bottom sheet view
-        bottom_sheet = findViewById(R.id.bottom_sheet);
-        // init the bottom sheet behavior
-        sheetBehavior = BottomSheetBehavior.from(bottom_sheet);
-
-        btn_bottom_sheet = findViewById(R.id.btn_bottom_sheet);
-      //  btn_bottom_sheet_dialog = findViewById(R.id.btn_bottom_sheet_dialog);
-
-        btn_Accept_Ride = bottom_sheet.findViewById(R.id.btn_accept_ride);
-        btn_Reject_Ride = bottom_sheet.findViewById(R.id.btn_reject_ride);
 
         btn_Reject_Ride.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -273,6 +332,7 @@ public class  MainActivity extends AppCompatActivity implements OnMapReadyCallba
 
                 }
             });
+
 
 
 
@@ -314,13 +374,14 @@ public class  MainActivity extends AppCompatActivity implements OnMapReadyCallba
                 ZoomMarkerIn(to,from);
 
                 UpdateJob(BookingID, 1);
-                set_driver_status("OnJob");
+                btn_bottom_sheet.setVisibility(View.GONE);
+             /*   set_driver_status("OnJob");
                 btn_bottom_sheet.setVisibility(View.GONE);
                 btn_begin_Ride.setVisibility(View.VISIBLE);
                 //btn_bottom_sheet.setText("1 Job Arrived");
                 btn_Accept_Ride.setVisibility(View.INVISIBLE);
                 btn_Reject_Ride.setVisibility(View.INVISIBLE);
-                JobinProgress = true;
+                JobinProgress = false;*/
             }
         });
 
@@ -380,6 +441,7 @@ public class  MainActivity extends AppCompatActivity implements OnMapReadyCallba
                 UpdateJob(BookingID,2);
                     resetJobSheet();
                 JobinProgress = false;
+                fab.setVisibility(View.GONE);
             }
         });
 
@@ -412,6 +474,7 @@ public class  MainActivity extends AppCompatActivity implements OnMapReadyCallba
                 btn_End_Ride.setVisibility(View.VISIBLE);
                 btn_POB.setVisibility(View.VISIBLE);
                 btn_drv_arrived.setVisibility(View.GONE);
+                fab.setVisibility(View.VISIBLE);
             }
         });
 
@@ -423,6 +486,7 @@ public class  MainActivity extends AppCompatActivity implements OnMapReadyCallba
                 DriverGuider = destination;
                 btn_End_Ride.setVisibility(View.VISIBLE);
                 btn_POB.setVisibility(View.GONE);
+                fab.setVisibility(View.VISIBLE);
 
 
             }
@@ -435,6 +499,7 @@ public class  MainActivity extends AppCompatActivity implements OnMapReadyCallba
 
                resetJobSheet();
                 JobinProgress = false;
+                fab.setVisibility(View.GONE);
 
             }
         });
@@ -450,6 +515,8 @@ public class  MainActivity extends AppCompatActivity implements OnMapReadyCallba
                 set_driver_status("OnTheWay");
                 btn_End_Ride.setVisibility(View.VISIBLE);
                 btn_drv_arrived.setVisibility(View.VISIBLE);
+                fab.setVisibility(View.VISIBLE);
+                JobinProgress = true;
             }
         });
         /**
@@ -488,6 +555,129 @@ public class  MainActivity extends AppCompatActivity implements OnMapReadyCallba
         LocalBroadcastManager.getInstance(this).registerReceiver(
                 mMessageReceiver, new IntentFilter("Booking_IDReciver"));
 
+
+
+
+
+    }
+
+    public void closesheet()
+    {
+        if (sheetBehavior.getState() != BottomSheetBehavior.STATE_EXPANDED) {
+           return;
+        } else {
+            sheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+
+        }
+    }
+
+
+
+
+
+    public void sendNotification(JSONObject notification) {
+
+
+      /*  String NOTIFICATION_TITLE;
+        String NOTIFICATION_MESSAGE;
+        String TOPIC;
+
+
+        TOPIC = "/topics/android1"; //topic must match with what the receiver subscribed to
+        NOTIFICATION_TITLE = "Driver Location update";
+        NOTIFICATION_MESSAGE = "My Location 51.0087,39.0001";
+
+        JSONObject notification = new JSONObject();
+        JSONObject notifcationBody = new JSONObject();
+        try {
+            notifcationBody.put("title", NOTIFICATION_TITLE);
+            notifcationBody.put("message", NOTIFICATION_MESSAGE);
+
+            notification.put("to", TOPIC);
+            notification.put("data", notifcationBody);
+        } catch (JSONException e) {
+            Log.e(TAG1, "onCreate: " + e.getMessage() );
+        }*/
+       // sendNotification(notification);
+
+
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Constant.FCM_API, notification,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        Log.i(Constant.TAG1, "onResponse: " + response.toString());
+
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Toast.makeText(MainActivity.this, "Request error", Toast.LENGTH_LONG).show();
+                        Log.i(Constant.TAG1, "onErrorResponse: Didn't work");
+                    }
+                }){
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> params = new HashMap<>();
+                params.put("Authorization", Constant.serverKey);
+                params.put("Content-Type", Constant.contentType);
+                return params;
+            }
+        };
+        MySingleton.getInstance(getApplicationContext()).addToRequestQueue(jsonObjectRequest);
+    }
+
+    public void send_fcm_msg(String Topic, LatLng Location , String Status, String JustUpdate)
+    {
+
+        JSONObject body = new JSONObject();
+        try {
+            body.put("to", "/topics/" + Topic);
+            body.put("priority", "high");
+            //body.put("android_channel_id", "pickmecab_updates");
+
+
+            JSONObject notification = new JSONObject();
+            notification.put("body", "Driver location update request");
+            notification.put("title", "Driver location updated");
+
+            body.put("notification", notification);
+            JSONObject data = new JSONObject();
+            data.put("title", "driver location changed");
+            data.put("body", "driver location updated");
+            //  data.put("message", "New Job");
+            // data.put("click_action","new_ride");
+            data.put("drvid", DriverID);
+            data.put("lat", (Location.latitude));
+            data.put("lng", (Location.longitude));
+            data.put("drvStatus", Status);
+            data.put("UpdateJob",JustUpdate);
+
+
+            body.put("data", data);
+        }
+        catch (JSONException e) {
+            Log.e(Constant.TAG1, "onCreate: " + e.getMessage() );
+        }
+        sendNotification(body);
+
+/*
+
+        FirebaseMessaging fm = FirebaseMessaging.getInstance();
+        fm.send(new RemoteMessage.Builder("DriverAPP" + "@gcm.googleapis.com")
+                .setMessageId(Integer.toString(123))
+                .addData("priority", "high")
+                .addData("location", "55.006,1.00")
+                .addData("driverID", DriverID)
+                .addData("DriverStatus", DriverStatus)
+                .addData("to","/topics/android1")
+                .build());
+*/
+
+    //    String response = FirebaseMessaging.getInstance().send(message);
+// Response is a message ID string.
+      //  System.out.println("Successfully sent message: " + response);
+
     }
 
 
@@ -495,15 +685,84 @@ public class  MainActivity extends AppCompatActivity implements OnMapReadyCallba
         @Override
         public void onReceive(Context context, Intent intent) {
             // Get extra data included in the Intent
-            BookingID = intent.getStringExtra("BookingID");
-            fatchJob(BookingID);
-           // Bundle b = intent.getBundleExtra("Location");
+            if (JobinProgress) {
+                Toast.makeText(context, "New job can't be started a job is already going on.", Toast.LENGTH_SHORT).show();
+            }
+            else
+            {
+                BookingID = intent.getStringExtra("BookingID");
+                int updatetype = intent.getIntExtra ("UpdateJob",1);
 
-          //   Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+                if(updatetype == 3) {
+                    fatchJob(BookingID,1);
+                    To_HomeFragment();
+                }
+
+                if(updatetype == 2) {
+                    fatchJob(BookingID,0);
+                    To_HomeFragment();
+                }
+                else
+                   UpdateJob(BookingID,updatetype);
+                // Bundle b = intent.getBundleExtra("Location");
+
+                //   Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+            }
         }
     };
+public void To_HomeFragment()
+    {
+
+        navController.navigate(R.id.nav_home);
+
+    }
+
+    void StartNow()
+    {
+        CharSequence text = "Ride Accepted!";
+        int duration = Toast.LENGTH_SHORT;
 
 
+
+        sheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+
+        Toast toast = Toast.makeText(getApplicationContext(), text, duration);
+        toast.show();
+
+
+        LatLng from = new LatLng(Notify_data.getLat_fr(), Notify_data.getLang_fr());
+        LatLng to = new LatLng(Notify_data.getLat_to(), Notify_data.getLang_to());
+
+        origin = new MarkerOptions().position(from).title("Pick Up");
+        destination = new MarkerOptions().position(to).title("Drop Off");
+        DriverGuider = origin;
+
+        PointA =  mMap.addMarker(origin);
+        PointB = mMap.addMarker(destination);
+
+        new FetchURL(MainActivity.this).execute(getUrl(origin.getPosition(), destination.getPosition(), "driving"), "driving");
+
+        CameraPosition googlePlex = CameraPosition.builder()
+                .target(origin.getPosition())
+                .zoom(13)
+                .bearing(0)
+                .tilt(45)
+                .build();
+
+        mMap.animateCamera(CameraUpdateFactory.newCameraPosition(googlePlex), 5500, null);
+        ZoomMarkerIn(to,from);
+
+        UpdateJob(BookingID, 1);
+        btn_bottom_sheet.setVisibility(View.GONE);
+        btn_begin_Ride.setVisibility(View.VISIBLE);
+             /*   set_driver_status("OnJob");
+                btn_bottom_sheet.setVisibility(View.GONE);
+                btn_begin_Ride.setVisibility(View.VISIBLE);
+                //btn_bottom_sheet.setText("1 Job Arrived");
+                btn_Accept_Ride.setVisibility(View.INVISIBLE);
+                btn_Reject_Ride.setVisibility(View.INVISIBLE);
+                JobinProgress = false;*/
+    }
 void resetJobSheet()
 {
     TextView mytext = bottom_sheet.findViewById(R.id.text_cname);
@@ -797,13 +1056,17 @@ public void getDrvStatus(final String status)
             checkLocationPermission();
         }
 
-        if (!JobinProgress) {
+        if (JobinProgress) {
+            Toast.makeText(getApplicationContext(), "New job can't be started a job is already going on.", Toast.LENGTH_SHORT).show();
+        }
+        else
+        {
             Bundle b = getIntent().getExtras();
             BookingID = ""; // or other values
             if (b != null) {
                 BookingID = b.getString("BookingID");
 
-                fatchJob(BookingID);
+                fatchJob(BookingID,0);
             }
         }
 
@@ -815,6 +1078,7 @@ public void getDrvStatus(final String status)
         if (mFusedLocationClient != null)
             mFusedLocationClient.removeLocationUpdates(mLocationCallback);
     }
+
 
     @Override
     public void onPause() {
@@ -837,29 +1101,44 @@ public void getDrvStatus(final String status)
                 Location location = locationList.get(locationList.size() - 1);
                 Log.i("MapsActivity", "Location: " + location.getLatitude() + " " + location.getLongitude());
                 mLastLocation = location;
+
+                LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
                 if (mCurrLocationMarker != null) {
                     mCurrLocationMarker.remove();
+
+                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions()
+                            .flat(true)
+                            .icon(BitmapDescriptorFactory
+                                    .fromResource(R.drawable.the_car))
+                            .anchor(0.5f, 0.5f)
+                            .position(latLng));
                 }
 
-               //Place current location marker
-                LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-
-                mCurrLocationMarker = mMap.addMarker(new MarkerOptions()
-                        .flat(true)
-                        .icon(BitmapDescriptorFactory
-                                .fromResource(R.drawable.the_car))
-                        .anchor(0.5f, 0.5f)
-                        .position(latLng));
 
 
-                animateMarker(mCurrLocationMarker, location); // Helper method for smooth
-                CameraPosition currentposition=mMap.getCameraPosition();
+              /*   */
+
+//Place current location marker
+
+                if (  mMap != null) {
+                    if(btn_begin_Ride.getVisibility()!=View.VISIBLE)
+                        animateCamera(location);
+                    firstTimeFlag = false;
+                }
+                showMarker(location);
+
+               animateMarker(mCurrLocationMarker, location); // Helper method for smooth
+               //CameraPosition currentposition=mMap.getCameraPosition();
 
 
-               // mCurrLocationMarker.setRotation(currentposition.bearing);
+
+
+
+
+            // mCurrLocationMarker.setRotation(currentposition.bearing);
                 //move map camera
-                if(btn_begin_Ride.getVisibility()!=View.VISIBLE)
-                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16));
+
+              // mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16));
                 if (btn_End_Ride.getVisibility() == View.VISIBLE) {
 
                     draw_route(latLng, DriverGuider.getPosition(),17);
@@ -870,7 +1149,28 @@ public void getDrvStatus(final String status)
         }
     };
 
+    @NonNull
+    private CameraPosition getCameraPositionWithBearing(LatLng latLng) {
+        return new CameraPosition.Builder().target(latLng).zoom(16).build();
+    }
 
+    private void animateCamera(@NonNull Location location) {
+        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+        mMap.animateCamera(CameraUpdateFactory.newCameraPosition(getCameraPositionWithBearing(latLng)));
+    }
+
+    private void showMarker(@NonNull Location currentLocation) {
+        LatLng latLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
+        if (mCurrLocationMarker == null)
+            mCurrLocationMarker =  mMap.addMarker(new MarkerOptions()
+                    .flat(true)
+                    .icon(BitmapDescriptorFactory
+                            .fromResource(R.drawable.the_car))
+                    .anchor(0.5f, 0.5f)
+                    .position(latLng));
+        else
+            MarkerAnimation.animateMarkerToGB(mCurrLocationMarker, latLng, new LatLngInterpolator.Spherical());
+    }
     public void animateMarker(final Marker marker, final Location location) {
         final Handler handler = new Handler();
         final long start = SystemClock.uptimeMillis();
@@ -895,7 +1195,7 @@ public void getDrvStatus(final String status)
                 float rotation = (float) (t * location.getBearing() + (1 - t)
                         * startRotation);
 
-                marker.setPosition(new LatLng(lat, lng));
+              //  marker.setPosition(new LatLng(lat, lng));
                 marker.setRotation(rotation);
 
                 if (t < 1.0) {
@@ -977,6 +1277,7 @@ public void getDrvStatus(final String status)
     }
 
 
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -1052,8 +1353,8 @@ public void set_driver_status(String  status)
 
 
         mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(30000); // two minute interval
-        mLocationRequest.setFastestInterval(15000);
+        mLocationRequest.setInterval(10000); // two minute interval
+        mLocationRequest.setFastestInterval(2500);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
 
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -1221,13 +1522,20 @@ public void set_driver_status(String  status)
 
 
                         // Process the JSON
-                     /*   try {
+                       try {
                             // Get the JSON array
                             JSONObject resObject= new JSONObject();
                             resObject = response.getJSONObject("data");
 
-                          /*  if(Accpet_reject)
-                                UpdateDriverIDonJob(null,DriverID);*/
+                            if(Accpet_reject==1) {
+                                String status = resObject.getString("status");
+                                if ( status == "BOOKED" ||status == "CANCELLED" || status == "DELETED") {
+
+                                    Toast.makeText(getApplicationContext(), "Oops too late. This job is already expired.", Toast.LENGTH_SHORT).show();
+                                    resetJobSheet();
+
+                                }
+                            }
 
                             // Loop through the array elements
                          /*   for (int i = 0; i < array.length(); i++) {
@@ -1242,11 +1550,11 @@ public void set_driver_status(String  status)
                                 // Display the formatted json data in text view
                                 //  mTextView.append(firstName +" " + lastName +"\nage : " + age);
                                 // mTextView.append("\n\n");
-                            }*//*
+                            }*/
                         } catch (JSONException e) {
                             e.printStackTrace();
 
-                        }*/
+                        }
                     }
                 },
                 new Response.ErrorListener() {
@@ -1267,7 +1575,7 @@ public void set_driver_status(String  status)
 
 
 }
-    public void fatchJob(String Booking_ID)
+    public void fatchJob(String Booking_ID, final int iStartNow)
     {
         String sURL = Constant.WEB_API_PATH+"bookings/" + Booking_ID;
 
@@ -1340,7 +1648,15 @@ public void set_driver_status(String  status)
                                 CalculationByDistance( new LatLng(Notify_data.getLat_fr(),Notify_data.getLang_fr()),new LatLng(Notify_data.getLat_to(),Notify_data.getLang_to()));
 
 
-                                sendMessage();
+                                if(iStartNow == 1)
+                                {
+                                    StartNow();
+                                    closeProgressDialog();
+                                }
+                                else {
+                                    sendMessage();
+                                    closeProgressDialog();
+                                }
                             }
 
                         } catch (JSONException e) {
@@ -1398,128 +1714,8 @@ public void set_driver_status(String  status)
                 .show();*/
     }
 
-    /*
-    public void getLocationFromAddress(String strAddress){
 
 
-        String sURL = "https://maps.googleapis.com/maps/api/geocode/json?address="+strAddress+"&key="+getString(R.string.API_KEY);
-
-
-        RequestQueue requestQueue = Volley.newRequestQueue(this);
-
-        // Initialize a new JsonObjectRequest instance
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
-                Request.Method.GET,
-                sURL,
-                null,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        // Do something with response
-                        //mTextView.setText(response.toString());
-
-                        // Process the JSON
-                        try {
-                            // Get the JSON array
-
-                            JSONObject userData = response.getJSONArray("results").getJSONObject(0).getJSONObject("geometry").getJSONObject("location");
-
-                            LatLng addressletlng = new LatLng(Double.parseDouble(userData.get("lat").toString()),Double.parseDouble(userData.get("lng").toString()));
-
-
-                            Notify_data.setLang_fr(addressletlng.longitude);
-                            Notify_data.setLat_fr(addressletlng.latitude);
-
-                                getLocationtoAddress(Notify_data.getM_to());
-
-
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-
-                    //   return null;
-
-                    }
-                }
-    },
-            new Response.ErrorListener() {
-        @Override
-        public void onErrorResponse(VolleyError error) {
-            // Do something when error occurred
-
-            Log.e("Error", "Error at sign in : " + error.getMessage());
-           // return null;
-        }
-    }
-        );
-
-    // Add JsonObjectRequest to the RequestQueue
-        requestQueue.add(jsonObjectRequest);
-
-    }
-
-
-
-    public void getLocationtoAddress(String strAddress){
-
-
-        String sURL = "https://maps.googleapis.com/maps/api/geocode/json?address="+strAddress+"&key="+getString(R.string.API_KEY);
-
-
-        RequestQueue requestQueue = Volley.newRequestQueue(this);
-
-        // Initialize a new JsonObjectRequest instance
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
-                Request.Method.GET,
-                sURL,
-                null,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        // Do something with response
-                        //mTextView.setText(response.toString());
-
-                        // Process the JSON
-                        try {
-                            // Get the JSON array
-
-                            JSONObject userData = response.getJSONArray("results").getJSONObject(0).getJSONObject("geometry").getJSONObject("location");
-
-                            LatLng addressletlng = new LatLng(Double.parseDouble(userData.get("lat").toString()),Double.parseDouble(userData.get("lng").toString()));
-
-
-                                Notify_data.setLang_to(addressletlng.longitude);
-                                Notify_data.setLat_to(addressletlng.latitude);
-
-
-
-
-
-
-
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-
-                            //   return null;
-
-                        }
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        // Do something when error occurred
-
-                        Log.e("Error", "Error at sign in : " + error.getMessage());
-                        // return null;
-                    }
-                }
-        );
-
-        // Add JsonObjectRequest to the RequestQueue
-        requestQueue.add(jsonObjectRequest);
-
-    }
-*/
 
     public double CalculationByDistance(LatLng StartP, LatLng EndP) {
         /*
@@ -1560,60 +1756,7 @@ public void set_driver_status(String  status)
 
 return 0;
     }
-/*
 
-    public void parseJSONLocation(LatLng point)
-    {
-        Toast.makeText(getApplicationContext(), "Test", Toast.LENGTH_LONG).show();
-        double lat = point.latitude;
-        double lng = point.longitude;
-
-        JSONObject ret = getJSONLocationInfo(lat, lng);
-        JSONObject location;
-        String location_string = "";
-
-        try {
-
-            //Get JSON Array called "results" and then get the 0th complete object as JSON
-            location = ret.getJSONArray("results").getJSONObject(0);
-            // Get the value of the attribute whose name is "formatted_string"
-            location_string = location.getString("formatted_address");
-            //Toast.makeText(getApplicationContext(), "formattted address:" + location_string, Toast.LENGTH_LONG).show();
-        } catch (JSONException e1) {
-            e1.printStackTrace();
-
-        }
-    }
-
-    public JSONObject getJSONLocationInfo(double lat, double lng)
-    {
-        HttpGet httpGet = new HttpGet("http://maps.googleapis.com/maps/api/geocode/json?latlng=" + lat + "," + lng + "&key=AIzaSyB3hYTOGwj2FM9rSCYxTag1VkJXpFRmkOc");
-        HttpClient client = new DefaultHttpClient();
-        HttpResponse response;
-        StringBuilder stringBuilder = new StringBuilder();
-
-        try {
-            response = client.execute(httpGet);
-            HttpEntity entity = response.getEntity();
-            InputStream stream = entity.getContent();
-            int b;
-            while ((b = stream.read()) != -1) {
-                stringBuilder.append((char) b);
-            }
-        } catch (ClientProtocolException e) {
-        } catch (IOException e) {
-        }
-
-        JSONObject jsonObject = new JSONObject();
-        try {
-            jsonObject = new JSONObject(stringBuilder.toString());
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        return jsonObject;
-    }
-*/
 
     public void sendMessage() {
 
@@ -1626,7 +1769,7 @@ return 0;
 
 
         update_bottom_shet(Notify_data, bottom_sheet);
-        closeProgressDialog();
+        //closeProgressDialog();
 
       //  update_bottom_shet(Notify_data, bottom_sheet);
 
@@ -1657,9 +1800,12 @@ return 0;
       //  mytext = bSheet.findViewById(R.id.text_duration);
       //  mytext.setText(Notify_data.getM_duration());
 
-        btn_bottom_sheet.setText("1 Job Arrived");
+        btn_bottom_sheet.setText("+ New Job Arrived");
         btn_Accept_Ride.setVisibility(View.VISIBLE);
         btn_Reject_Ride.setVisibility(View.VISIBLE);
+
+
+
 
     }
 
