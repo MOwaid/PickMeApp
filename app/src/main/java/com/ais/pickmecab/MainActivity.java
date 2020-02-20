@@ -146,6 +146,7 @@ public class  MainActivity extends AppCompatActivity implements  OnMapReadyCallb
     String FunctionType;
     String DriverID = null, DriverStatus = "";
     NavController navController;
+     float start_rotation = 0;
 
 
 
@@ -1127,7 +1128,7 @@ public void getDrvStatus(final String status)
                 }
                 showMarker(location);
 
-               animateMarker(mCurrLocationMarker, location); // Helper method for smooth
+               animateMarker(mCurrLocationMarker, location,start_rotation); // Helper method for smooth
                //CameraPosition currentposition=mMap.getCameraPosition();
 
 
@@ -1135,13 +1136,17 @@ public void getDrvStatus(final String status)
 
 
 
-            // mCurrLocationMarker.setRotation(currentposition.bearing);
+            // mCurrLocationMarker.setRotation(location.bearing);
                 //move map camera
 
               // mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16));
                 if (btn_End_Ride.getVisibility() == View.VISIBLE) {
 
                     draw_route(latLng, DriverGuider.getPosition(),17);
+                }
+                else {
+                    if (currentPolyline != null)
+                        currentPolyline.remove();
                 }
 
 
@@ -1171,12 +1176,12 @@ public void getDrvStatus(final String status)
         else
             MarkerAnimation.animateMarkerToGB(mCurrLocationMarker, latLng, new LatLngInterpolator.Spherical());
     }
-    public void animateMarker(final Marker marker, final Location location) {
+    public void animateMarker(final Marker marker, final Location location, final float st) {
         final Handler handler = new Handler();
         final long start = SystemClock.uptimeMillis();
         final LatLng startLatLng = marker.getPosition();
-        final double startRotation = marker.getRotation();
-        final long duration = 500;
+        final double startRotation = st;//marker.getRotation();
+        final long duration = 2000;
 
         final Interpolator interpolator = new LinearInterpolator();
 
@@ -1196,7 +1201,10 @@ public void getDrvStatus(final String status)
                         * startRotation);
 
               //  marker.setPosition(new LatLng(lat, lng));
-                marker.setRotation(rotation);
+
+
+                marker.setRotation(-rotation > 180 ? rotation / 2 : rotation);
+                start_rotation = -rotation > 180 ? rotation / 2 : rotation;
 
                 if (t < 1.0) {
                     // Post again 16ms later.
