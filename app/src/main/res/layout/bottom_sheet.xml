@@ -113,12 +113,23 @@
           android:layout_marginTop="12dp"
           android:layout_marginBottom="12dp"
           android:background="#5d5d5d" />
+      <LinearLayout
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_marginTop="1dp"
+          android:orientation="horizontal">
+      <TextView
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:textStyle="bold"
+          android:text="Start Time: " />
 
       <TextView
           android:id="@+id/text_time"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
           android:textColor="#5692F5" />
+    </LinearLayout>
 
       <View
           android:layout_width="match_parent"
@@ -142,13 +153,15 @@
 
 
   <TextView
-      android:id="@+id/text_cphone"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_margin="8dp"
-      android:drawableLeft="@drawable/ic_action_local_phone"
-      android:drawablePadding="16dp"
-      android:text="Waiting ..." />
+    android:id="@+id/text_cphone"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    android:drawableLeft="@drawable/ic_action_local_phone"
+    android:drawablePadding="16dp"
+    android:text="Waiting ..." />
+
+
 
   <TextView
       android:id="@+id/text_duration"
@@ -160,22 +173,182 @@
       android:text="Waiting ..." />
 
   <LinearLayout
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="8dp"
+      android:orientation="horizontal">
+  <TextView
+
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:textStyle="bold"
+      android:text="#PPL: " />
+
+  <TextView
+      android:id="@+id/text_ppl"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginLeft="8dp"
+      android:textColor="#010207"
+      android:text="1" />
+
+    <TextView
+
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textStyle="bold"
+        android:layout_marginLeft="8dp"
+        android:text="#Bag: " />
+
+    <TextView
+        android:id="@+id/text_bags"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        android:textColor="#010207"
+        android:text="1" />
+
+    <TextView
+
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textStyle="bold"
+        android:layout_marginLeft="8dp"
+        android:text="#Payment Type: " />
+
+    <TextView
+        android:id="@+id/text_payment"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        android:textColor="#010207"
+        android:text="Cash" />
+
+
+  </LinearLayout>
+
+  <LinearLayout
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="8dp"
+      android:orientation="horizontal">
+
+    <TextView
+
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="INST: " />
+
+    <TextView
+        android:id="@+id/text_inst"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        android:textColor="#010207"
+        android:text="NA" />
+  </LinearLayout>
+  <LinearLayout
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="8dp"
+      android:orientation="horizontal">
+  <TextView
+
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:textStyle="bold"
+
+      android:text="Miles: " />
+
+  <TextView
+      android:id="@+id/text_miles"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginLeft="8dp"
+      android:textColor="#010207"
+      android:text="0" />
+
+      <TextView
+
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:textStyle="bold"
+          android:layout_marginLeft="8dp"
+          android:text="Journey fare: " />
+
+      <TextView
+          android:id="@+id/text_cost"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_marginLeft="8dp"
+          android:textColor="#010207"
+          android:text="0.00£" />
+
+
+      <TextView
+
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:textStyle="bold"
+          android:layout_marginLeft="8dp"
+          android:text="Flight no: " />
+
+      <TextView
+          android:id="@+id/text_flightNo"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_marginLeft="8dp"
+          android:textColor="#010207"
+          android:text="NA" />
+
+
+
+  </LinearLayout>
+  <LinearLayout
+      android:layout_width="fill_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="8dp"
+      android:orientation="horizontal"
+      android:layout_weight="0"
+      android:visibility="gone">
+    <TextView
+        android:id="@+id/timer_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Response within:"
+        android:textColor="#0C0000"
+        android:layout_weight="1.0"
+        android:textSize="24sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/text_timer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="00:00"
+        android:layout_weight="1.0"
+        android:textColor="#F80101"
+        android:textSize="24sp"
+        android:textStyle="bold" />
+  </LinearLayout>
+  <LinearLayout
       android:layout_width="fill_parent"
       android:layout_height="wrap_content"
       android:layout_marginTop="8dp"
       android:orientation="horizontal"
       android:layout_weight="0">
 
+
     <Button
-        android:id="@+id/btn_accept_ride"
-        android:layout_width="0.0dip"
-        android:layout_height="fill_parent"
-        android:layout_marginTop="16dp"
-        android:layout_weight="1.0"
-        android:background="#000"
-        android:text="Accept RIDE"
-        android:textColor="#fff"
-        android:visibility="invisible" />
+      android:id="@+id/btn_accept_ride"
+      android:layout_width="0.0dip"
+      android:layout_height="fill_parent"
+      android:layout_marginTop="16dp"
+      android:layout_weight="1.0"
+      android:background="#000"
+      android:text="Accept RIDE"
+      android:textColor="#fff"
+      android:visibility="gone" />
 
     <Button
         android:id="@+id/btn_reject_ride"
@@ -187,7 +360,20 @@
         android:background="#250"
         android:text="REJECT RIDE"
         android:textColor="#fff"
-        android:visibility="invisible" />
+        android:visibility="gone" />
+
+    <Button
+        android:id="@+id/btn_close"
+        android:layout_width="0.0dip"
+        android:layout_height="fill_parent"
+        android:layout_marginLeft="4dp"
+        android:layout_marginTop="16dp"
+        android:layout_weight="1.0"
+        android:background="#010300"
+        android:text="close"
+        android:textColor="#fff"
+        android:visibility="visible" />
+
   </LinearLayout>
 
 </LinearLayout>

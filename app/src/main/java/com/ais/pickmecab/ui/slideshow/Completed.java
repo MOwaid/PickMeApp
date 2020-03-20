@@ -100,7 +100,7 @@ public class Completed extends Fragment {
         try {
 
             customer = job.getJSONObject("customer").getString("firstName");
-            from = job.getJSONObject("pickupAddress").getString("completeAddress");
+            from = job.getJSONObject("pickupAddress").getString("street");
             to = job.getJSONObject("destinationAddress").getString("street");
             start_datetime = job.getString("startTime");
             BookingID = job.getString("id");

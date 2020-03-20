@@ -1,5 +1,10 @@
 package com.ais.pickmecab;
 
+import com.google.android.gms.maps.model.LatLng;
+
+import java.util.ArrayList;
+import java.util.List;
+
 public class NotificationDataParser {
 
 
@@ -10,10 +15,97 @@ public class NotificationDataParser {
   String m_placeName;
   String m_to;
   String m_From;
+  List<String> viaAddress = new ArrayList<String>();
+  List<LatLng> viaLatLngArray = new ArrayList<LatLng>();
   String m_duration;
   String m_cPhone;
   String m_bPhone;
   String CustomerName;
+  String noppl;
+  String nobags;
+  String Inst;
+  String start_time;
+  String payment_type;
+  String warning_timer;
+  String miles;
+  String pri;
+  String flightNo;
+  String BookingNo;
+
+  public String getFlightNo() {
+    return flightNo;
+  }
+
+  public void setFlightNo(String flightNo) {
+    this.flightNo = flightNo;
+  }
+
+
+
+  public String getBookingNo() {
+    return BookingNo;
+  }
+
+  public void setBookingNo(String bookingNo) {
+    BookingNo = bookingNo;
+  }
+  public String getMiles() {
+    return miles;
+  }
+  public String getPrice() {
+    return pri;
+  }
+
+  public void setPrice(String pri) {
+    this.pri = pri;
+  }
+  public void setMiles(String miles) {
+    this.miles = miles;
+  }
+
+  public String getWarning_timer() {
+    return warning_timer;
+  }
+
+  public void setWarning_timer(String warning_timer) {
+    this.warning_timer = warning_timer;
+  }
+
+  public String getPayment_type() {
+    return payment_type;
+  }
+
+  public void setPayment_type(String payment_type) {
+    this.payment_type = payment_type;
+  }
+  public String getStart_time() {
+    return start_time;
+  }
+
+  public void setStart_time(String start_time) {
+    this.start_time = start_time;
+  }
+
+  public String getInst() {
+    return Inst;
+  }
+
+  public void setInst(String inst) {
+    Inst = inst;
+  }
+  public String getNoppl() {
+    return noppl;
+  }
+  public String getNobags() {
+    return nobags;
+  }
+
+  public void setNobags(String nobags) {
+    this.nobags = nobags;
+  }
+  public void setNoppl(String noppl) {
+    this.noppl = noppl;
+  }
 
   public Double getLat_fr() {
     return lat_fr;

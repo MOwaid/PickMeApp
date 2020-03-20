@@ -18,6 +18,7 @@ import com.ais.pickmecab.Constant;
 import com.ais.pickmecab.CustomDialog;
 import com.ais.pickmecab.CustomListAdapter;
 import com.ais.pickmecab.ListItem;
+import com.ais.pickmecab.ListItemComparator;
 import com.ais.pickmecab.R;
 import com.ais.pickmecab.SplashActivity;
 import com.android.volley.Request;
@@ -36,6 +37,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Locale;
 import android.app.ProgressDialog;
@@ -78,7 +80,7 @@ public class Allocated extends Fragment {
 
     }
 
-    private void showCustomDialog(ListItem job) {
+    private boolean showCustomDialog(ListItem job) {
         //before inflating the custom alert dialog layout, we will get the current activity viewgroup
       /*  ViewGroup viewGroup = getActivity().findViewById(android.R.id.content);
 
@@ -107,6 +109,7 @@ public class Allocated extends Fragment {
 
         CustomDialog cdd=new CustomDialog(getActivity(),job, 1);
         cdd.show();
+        return cdd.isAccepted();
     }
 
     private void loadallJob()
@@ -118,8 +121,11 @@ public class Allocated extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> a, View v, int position, long id) {
                 ListItem user = (ListItem) lv.getItemAtPosition(position);
-                showCustomDialog(user);
-                Toast.makeText(getActivity(), "Selected :" + " " + user.getName()+", "+ user.getLocation(), Toast.LENGTH_SHORT).show();
+               if(showCustomDialog(user))
+               {
+
+               }
+              /*  Toast.makeText(getActivity(), "Selected :" + " " + user.getName()+", "+ user.getLocation(), Toast.LENGTH_SHORT).show();*/
             }
         });
         progress.dismiss();
@@ -140,7 +146,7 @@ public class Allocated extends Fragment {
             if (strDate.after(Todaydate) || Todaydate.equals(strDate) ) {
 
                 customer = job.getJSONObject("customer").getString("firstName");
-                from = job.getJSONObject("pickupAddress").getString("completeAddress");
+                from = job.getJSONObject("pickupAddress").getString("street");
                 to = job.getJSONObject("destinationAddress").getString("street");
 
                 BookingID = job.getString("id");
@@ -170,7 +176,12 @@ public class Allocated extends Fragment {
 
     private ArrayList getListAssignJobs() {
 
+        if(AssignedJobs.size()>0) {
+            Collections.sort(AssignedJobs, new ListItemComparator());
+            //AssignedJobs.remove(0);
+        }
         return AssignedJobs;
+
     }
 
     public void showLoading()
@@ -213,7 +224,7 @@ public class Allocated extends Fragment {
                             // Process the JSON
                             try{
                                 // Loop through the array elements
-                                for(int i=0;i<Jobs.length();i++){
+                                for(int i=1;i<Jobs.length();i++){
                                     // Get current json object
                                     JSONObject Job = Jobs.getJSONObject(i);
                                     if((Job.getString("status")).equals("ALLOCATED"))

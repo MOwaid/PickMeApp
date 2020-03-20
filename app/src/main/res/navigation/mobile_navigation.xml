@@ -22,6 +22,11 @@
         android:name="com.ais.pickmecab.ui.slideshow.SlideshowFragment"
         android:label="@string/menu_slideshow"
         tools:layout="@layout/fragment_reports" />
+    <fragment
+        android:id="@+id/nav_profile"
+        android:name="com.ais.pickmecab.ui.profile.profile"
+        android:label="Profile"
+        tools:layout="@layout/profile_fragment" />
 
     <fragment
         android:id="@+id/nav_tools"
@@ -45,9 +50,5 @@
         android:name="com.ais.pickmecab.ui.About.AboutFragment"
         android:label="@string/menu_about"
         tools:layout="@layout/about_fragment" />
-    <fragment
-        android:id="@+id/nav_profile"
-        android:name="com.ais.pickmecab.ui.profile.profile"
-        android:label="Profile"
-        tools:layout="@layout/profile_fragment" />
+
 </navigation>

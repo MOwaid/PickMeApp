@@ -32,11 +32,11 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
             android:background="@android:color/transparent"
-            android:drawableLeft="@drawable/email"
+            android:drawableLeft="@drawable/user"
             android:drawablePadding="8dp"
             android:gravity="center_vertical"
-            android:hint="@string/email"
-            android:inputType="textEmailAddress"
+            android:hint="@string/UserID"
+
             android:padding="10dp"
             android:singleLine="true"
             android:textColor="@color/white"
@@ -122,18 +122,19 @@
     </LinearLayout>
 
 
-<TextView
-    android:id="@+id/createAccount"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_below="@+id/login_layout"
-    android:layout_centerHorizontal="true"
-    android:layout_marginTop="15dp"
-    android:gravity="center"
-    android:padding="5dp"
-    android:text="@string/newUser"
-    android:textColor="@color/white"
-    android:textSize="15sp" />
+    <TextView
+        android:id="@+id/createAccount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/login_layout"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="15dp"
+        android:gravity="center"
+        android:padding="5dp"
+        android:text="@string/newUser"
+        android:textColor="@color/white"
+        android:textSize="15sp"
+        android:visibility="gone" />
 
 
 

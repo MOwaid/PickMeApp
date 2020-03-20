@@ -96,6 +96,7 @@ public class LoginViewModel extends ViewModel {
                         SplashActivity.editor.putString("UserID", userID);
                         SplashActivity.editor.putString("Driver_db_id", response.getString("userDbId"));
                         SplashActivity.editor.putString("UserPwd", passWord);
+
                         SplashActivity.editor.commit();
                     }
                     else {

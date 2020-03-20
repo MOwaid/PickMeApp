@@ -1,6 +1,8 @@
 package com.ais.pickmecab;
 
 import android.Manifest;
+import android.animation.ArgbEvaluator;
+import android.animation.ObjectAnimator;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
@@ -10,10 +12,13 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
+import android.graphics.PorterDuff;
 import android.location.Location;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -52,14 +57,20 @@ import android.os.Handler;
 import android.os.Looper;
 
 import android.os.SystemClock;
+import android.provider.Settings;
+import android.text.TextUtils;
+import android.util.Base64;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
 import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
 import android.widget.Button;
 import android.widget.CompoundButton;
 
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import android.widget.Switch;
@@ -70,10 +81,14 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.messaging.FirebaseMessaging;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import androidx.core.graphics.drawable.RoundedBitmapDrawable;
+import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory;
+import androidx.core.location.LocationManagerCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
@@ -112,6 +127,19 @@ public class  MainActivity extends AppCompatActivity implements  OnMapReadyCallb
 
     JSONArray AllBooking;
     JSONObject Booking;
+    ImageView mIcon;
+    CountDown timer;
+    RoundedBitmapDrawable mDrawable;
+
+    public JSONObject getM_pDriver() {
+        return m_pDriver;
+    }
+
+    public void setM_pDriver(JSONObject m_pDriver) {
+        this.m_pDriver = m_pDriver;
+    }
+
+    JSONObject m_pDriver = null;
 
     private boolean firstTimeFlag = true;
 
@@ -121,12 +149,16 @@ public class  MainActivity extends AppCompatActivity implements  OnMapReadyCallb
     public static String str_login_test;
 
     BottomSheetBehavior sheetBehavior;
+    BottomSheetDialog bottomSheetDialog;
+    BottomSheetDialog summarySheetDlg;
+
+    View getSheetLayout,getSummaryLayout;
     LinearLayout bottom_sheet;
     Button btn_bottom_sheet, btn_bottom_sheet_dialog;
     FloatingActionButton fab;
 
-    Button btn_Accept_Ride,btn_Reject_Ride;
-    Button btn_begin_Ride, btn_End_Ride,btn_drv_arrived,btn_POB,btn_no_show;
+    Button btn_Accept_Ride,btn_Reject_Ride,btn_close_dlg,Btn_close_summay;
+    Button btn_begin_Ride, btn_End_Ride,btn_drv_arrived,btn_POB,btn_no_show, btn_via;
     Switch mySwitch;
 
     NotificationDataParser Notify_data;
@@ -144,9 +176,11 @@ public class  MainActivity extends AppCompatActivity implements  OnMapReadyCallb
     Menu item;
     String  BookingID=null;
     String FunctionType;
+    String currentBookingID="";
     String DriverID = null, DriverStatus = "";
     NavController navController;
      float start_rotation = 0;
+     int stopcount = 0;
 
 
 
@@ -160,6 +194,15 @@ public class  MainActivity extends AppCompatActivity implements  OnMapReadyCallb
         getSupportActionBar().setDisplayShowTitleEnabled(true);
 
         toolbar.setTitle("my title");
+       /* mIcon =  findViewById(R.id.image_profile);
+
+        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.circle);
+
+        mDrawable = RoundedBitmapDrawableFactory.create(getResources(), bitmap);
+        mDrawable.setCircular(true);
+
+        mDrawable.setColorFilter(ContextCompat.getColor(getApplicationContext(), R.color.colorAccent), PorterDuff.Mode.DST_OVER);
+        mIcon.setImageDrawable(mDrawable);*/
 
       /*  ImageButton btnNav = findViewById(R.id.NavBtn);
         btnNav.setOnClickListener(new View.OnClickListener() {
@@ -185,16 +228,30 @@ public class  MainActivity extends AppCompatActivity implements  OnMapReadyCallb
         });
 
 
+        getSheetLayout = getLayoutInflater().inflate(R.layout.bottom_sheet, null);
+        bottomSheetDialog = new BottomSheetDialog(MainActivity.this);
+        bottomSheetDialog.setContentView(getSheetLayout);
+        bottomSheetDialog.setCancelable(false);
+
+
+        getSummaryLayout = getLayoutInflater().inflate(R.layout.summary_sheet, null);
+        summarySheetDlg = new BottomSheetDialog(MainActivity.this);
+        summarySheetDlg.setContentView(getSummaryLayout);
+        summarySheetDlg.setCancelable(false);
+
         // get the bottom sheet view
         bottom_sheet = findViewById(R.id.bottom_sheet);
         // init the bottom sheet behavior
         sheetBehavior = BottomSheetBehavior.from(bottom_sheet);
 
         btn_bottom_sheet = findViewById(R.id.btn_bottom_sheet);
-        //  btn_bottom_sheet_dialog = findViewById(R.id.btn_bottom_sheet_dialog);
+        //btn_bottom_sheet_dialog = findViewById(R.id.btn_bottom_sheet_dialog);
 
-        btn_Accept_Ride = bottom_sheet.findViewById(R.id.btn_accept_ride);
-        btn_Reject_Ride = bottom_sheet.findViewById(R.id.btn_reject_ride);
+        Btn_close_summay = getSummaryLayout.findViewById(R.id.btn_Summclose);
+
+        btn_Accept_Ride = getSheetLayout.findViewById(R.id.btn_accept_ride);
+        btn_close_dlg =  getSheetLayout.findViewById(R.id.btn_close);
+        btn_Reject_Ride = getSheetLayout.findViewById(R.id.btn_reject_ride);
 
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
@@ -321,12 +378,13 @@ public class  MainActivity extends AppCompatActivity implements  OnMapReadyCallb
             public void onClick(View view) {
                 CharSequence text = "Ride Rejected!";
                 int duration = Toast.LENGTH_SHORT;
-                sheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+               // sheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
                 Toast toast = Toast.makeText(getApplicationContext(), text, duration);
                 toast.show();
                 UpdateJob(BookingID,0);
                 resetJobSheet();
                 JobinProgress = false;
+                bottomSheetDialog.dismiss();
 
                // loadNavigationView(Notify_data.getLat_to(),Notify_data.getLang_to());
 
@@ -335,8 +393,21 @@ public class  MainActivity extends AppCompatActivity implements  OnMapReadyCallb
             });
 
 
+        btn_close_dlg.setOnClickListener(new View.OnClickListener() {
+                                             @Override
+                                             public void onClick(View view) {
+                                                 bottomSheetDialog.dismiss();
 
+                                             }
+                                         });
 
+        Btn_close_summay.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                 summarySheetDlg.dismiss();
+
+            }
+        });
 
         btn_Accept_Ride.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -375,7 +446,7 @@ public class  MainActivity extends AppCompatActivity implements  OnMapReadyCallb
                 ZoomMarkerIn(to,from);
 
                 UpdateJob(BookingID, 1);
-                btn_bottom_sheet.setVisibility(View.GONE);
+                bottomSheetDialog.dismiss();
              /*   set_driver_status("OnJob");
                 btn_bottom_sheet.setVisibility(View.GONE);
                 btn_begin_Ride.setVisibility(View.VISIBLE);
@@ -383,6 +454,7 @@ public class  MainActivity extends AppCompatActivity implements  OnMapReadyCallb
                 btn_Accept_Ride.setVisibility(View.INVISIBLE);
                 btn_Reject_Ride.setVisibility(View.INVISIBLE);
                 JobinProgress = false;*/
+               resetJobSheet();
             }
         });
 
@@ -392,7 +464,7 @@ public class  MainActivity extends AppCompatActivity implements  OnMapReadyCallb
 
 
         // click event for show-dismiss bottom sheet
-        btn_bottom_sheet.setOnClickListener(new View.OnClickListener() {
+      /*  btn_bottom_sheet.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (sheetBehavior.getState() != BottomSheetBehavior.STATE_EXPANDED) {
@@ -403,7 +475,7 @@ public class  MainActivity extends AppCompatActivity implements  OnMapReadyCallb
                     btn_bottom_sheet.setText("Expand sheet");
                 }
             }
-        });
+        });*/
 // callback for do something
         sheetBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
@@ -442,7 +514,11 @@ public class  MainActivity extends AppCompatActivity implements  OnMapReadyCallb
                 UpdateJob(BookingID,2);
                     resetJobSheet();
                 JobinProgress = false;
+                stopcount = 0;
+                btn_via.setVisibility(View.GONE);
                 fab.setVisibility(View.GONE);
+                loadridesummary(Notify_data, getSummaryLayout);
+                summarySheetDlg.show();
             }
         });
 
@@ -479,19 +555,69 @@ public class  MainActivity extends AppCompatActivity implements  OnMapReadyCallb
             }
         });
 
+        btn_via = findViewById(R.id.btn_drv_Via);
         btn_POB = findViewById(R.id.btn_POB);
+
         btn_POB.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 // Code here executes on main thread after user presses button
                 set_driver_status("POB");
-                DriverGuider = destination;
-                btn_End_Ride.setVisibility(View.VISIBLE);
-                btn_POB.setVisibility(View.GONE);
-                fab.setVisibility(View.VISIBLE);
+                if(Notify_data.viaLatLngArray.size() > 0)
+                {
+                    MarkerOptions stops =  new MarkerOptions().position(Notify_data.viaLatLngArray.get(0)).title("Stop Over");
+                    DriverGuider =  stops;
+                    stopcount = 1;
+                    btn_via.setVisibility(View.VISIBLE);
+                    btn_End_Ride.setVisibility(View.VISIBLE);
+                    btn_POB.setVisibility(View.GONE);
+                    fab.setVisibility(View.VISIBLE);
+                }
+                else {
+                    DriverGuider = destination;
+                    btn_End_Ride.setVisibility(View.VISIBLE);
+                    btn_POB.setVisibility(View.GONE);
+                    fab.setVisibility(View.VISIBLE);
+                }
 
 
             }
         });
+
+        btn_via.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                // Code here executes on main thread after user presses button
+                int no_of_stops = Notify_data.viaLatLngArray.size();
+                if( no_of_stops> 0) {
+                    if (no_of_stops > stopcount) {
+                        MarkerOptions stops = new MarkerOptions().position(Notify_data.viaLatLngArray.get(stopcount)).title("Stop Over");
+                        Resources res = getResources();
+                        stopcount ++;
+                        String title = res.getString(R.string.stop_info, stopcount);// String.format("%2$d Stop Arrived", stopcount);
+                        btn_via.setText(title);
+
+                        DriverGuider = stops;
+                    }
+                    else
+                    {
+                        DriverGuider = destination;
+                        btn_End_Ride.setVisibility(View.VISIBLE);
+                        btn_via.setVisibility(View.GONE);
+                        btn_POB.setVisibility(View.GONE);
+                        fab.setVisibility(View.VISIBLE);
+                    }
+                }
+
+              /*  set_driver_status("POB");
+                DriverGuider = destination;
+                btn_End_Ride.setVisibility(View.VISIBLE);
+                btn_POB.setVisibility(View.GONE);
+                fab.setVisibility(View.VISIBLE);*/
+
+
+            }
+        });
+
+
 
         btn_no_show = findViewById(R.id.btn_NOSHOW);
         btn_no_show.setOnClickListener(new View.OnClickListener() {
@@ -511,7 +637,7 @@ public class  MainActivity extends AppCompatActivity implements  OnMapReadyCallb
         btn_begin_Ride.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 // Code here executes on main thread after user presses button
-
+                stopcount = 0;
                 draw_route(mCurrLocationMarker.getPosition(),DriverGuider.getPosition(),17);
                 set_driver_status("OnTheWay");
                 btn_End_Ride.setVisibility(View.VISIBLE);
@@ -541,21 +667,27 @@ public class  MainActivity extends AppCompatActivity implements  OnMapReadyCallb
 
         /**
          * Show BottomSheetDialog on click of button
-         *//*
-        btn_bottom_sheet_dialog.setOnClickListener(new View.OnClickListener() {
+         */
+        btn_bottom_sheet.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                View getSheetLayout = getLayoutInflater().inflate(R.layout.bottom_sheet, null);
 
-                BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(MainActivity.this);
-                bottomSheetDialog.setContentView(getSheetLayout);
+
+
+
+
                 bottomSheetDialog.show();
+
+
+
             }
-        });*/
+        });
 
         LocalBroadcastManager.getInstance(this).registerReceiver(
                 mMessageReceiver, new IntentFilter("Booking_IDReciver"));
 
+
+     //   fetchDriver(DriverID);
 
 
 
@@ -570,8 +702,35 @@ public class  MainActivity extends AppCompatActivity implements  OnMapReadyCallb
             sheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
 
         }
+        if(bottomSheetDialog!=null)
+        bottomSheetDialog.dismiss();
     }
 
+public void loadprofilepic(){
+
+
+
+        try {
+
+
+           JSONObject drv = getM_pDriver();
+            if (drv != null) {
+                 final String imageString = drv.getString("photo");
+               /* byte[] decodedString = Base64.decode(imageString, Base64.DEFAULT);
+                Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+
+                mDrawable = RoundedBitmapDrawableFactory.create(getResources(), decodedByte);
+                mDrawable.setCircular(true);
+                mDrawable.setColorFilter(ContextCompat.getColor(getApplicationContext(), R.color.colorAccent), PorterDuff.Mode.DST_OVER);
+
+                mIcon.setImageDrawable(mDrawable);*/
+            }
+
+        }catch (JSONException e) {
+                //progress.dismiss();
+                e.printStackTrace();
+            }
+}
 
 
 
@@ -764,35 +923,7 @@ public void To_HomeFragment()
                 btn_Reject_Ride.setVisibility(View.INVISIBLE);
                 JobinProgress = false;*/
     }
-void resetJobSheet()
-{
-    TextView mytext = bottom_sheet.findViewById(R.id.text_cname);
-    mytext.setText("Waiting...");
-    mytext = bottom_sheet.findViewById(R.id.text_title);
-    mytext.setText("Waiting for Job ...");
-    mytext = bottom_sheet.findViewById(R.id.text_from);
-    mytext.setText("");
-    mytext = bottom_sheet.findViewById(R.id.text_to);
-    mytext.setText("");
-    mytext = bottom_sheet.findViewById(R.id.text_location);
-    mytext.setText("Waiting for job location ...");
-    mytext = bottom_sheet.findViewById(R.id.text_cphone);
-    mytext.setText("Waiting... ");
-    mytext = bottom_sheet.findViewById(R.id.text_duration);
-    mytext.setText("Waiting...");
-    btn_Accept_Ride.setVisibility(View.GONE);
-    btn_Reject_Ride.setVisibility(View.GONE);
-    btn_begin_Ride.setVisibility(View.GONE);
-    btn_bottom_sheet.setVisibility(View.VISIBLE);
-    btn_drv_arrived.setVisibility(View.GONE);
-    btn_no_show.setVisibility(View.GONE);
-    btn_POB.setVisibility(View.GONE);
-    btn_End_Ride.setVisibility(View.INVISIBLE);
-    btn_End_Ride.setVisibility(View.GONE);
-    set_driver_status("ONLINE");
-    clearMapp();
 
-}
 void ZoomMarkerIn(LatLng One, LatLng Two)
 {
 
@@ -1036,8 +1167,33 @@ public void getDrvStatus(final String status)
 
 
 
+  /*  public static boolean isLocationEnabled(Context context) {
+        int locationMode = 0;
+        String locationProviders;
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
+            try {
+                locationMode = Settings.Secure.getInt(context.getContentResolver(), Settings.Secure.LOCATION_MODE);
 
+            } catch (Settings.SettingNotFoundException e) {
+                e.printStackTrace();
+                return false;
+            }
+
+            return locationMode != Settings.Secure.LOCATION_MODE_OFF;
+
+        }else{
+            locationProviders = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
+            return !TextUtils.isEmpty(locationProviders);
+        }
+
+    }*/
+
+  private boolean isLocationEnabled(Context context) {
+      LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+
+      return LocationManagerCompat.isLocationEnabled(locationManager);
+  }
 
 
 
@@ -1047,16 +1203,30 @@ public void getDrvStatus(final String status)
     @Override
     protected void onResume() {
         super.onResume();
-        if (ContextCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED) {
+        if(isLocationEnabled(this)) {
+            if (ContextCompat.checkSelfPermission(this,
+                    Manifest.permission.ACCESS_FINE_LOCATION)
+                    == PackageManager.PERMISSION_GRANTED) {
 
-            mFusedLocationClient.requestLocationUpdates(mLocationRequest, mLocationCallback, Looper.myLooper());
-        } else {
-            //Request Location Permission
-            checkLocationPermission();
+                mFusedLocationClient.requestLocationUpdates(mLocationRequest, mLocationCallback, Looper.myLooper());
+            } else {
+                //Request Location Permission
+                checkLocationPermission();
+            }
         }
-
+        else
+        {
+            new AlertDialog.Builder(this)
+                    .setMessage(R.string.gps_network_not_enabled)
+                    .setPositiveButton(R.string.open_location_settings, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+                            startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+                        }
+                    })
+                    .setNegativeButton(R.string.Cancel,null)
+                    .show();
+        }
         if (JobinProgress) {
             Toast.makeText(getApplicationContext(), "New job can't be started a job is already going on.", Toast.LENGTH_SHORT).show();
         }
@@ -1066,8 +1236,13 @@ public void getDrvStatus(final String status)
             BookingID = ""; // or other values
             if (b != null) {
                 BookingID = b.getString("BookingID");
-
-                fatchJob(BookingID,0);
+                if(currentBookingID.equals(BookingID)) {
+                  // do nothing
+                }
+                else {
+                    currentBookingID = BookingID;
+                    fatchJob(BookingID, 0);
+                }
             }
         }
 
@@ -1361,8 +1536,8 @@ public void set_driver_status(String  status)
 
 
         mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(10000); // two minute interval
-        mLocationRequest.setFastestInterval(2500);
+        mLocationRequest.setInterval(60000); // two minute interval
+        mLocationRequest.setFastestInterval(10000);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
 
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -1616,7 +1791,54 @@ public void set_driver_status(String  status)
                                 Notify_data.setM_bPhone("07553349987");
                                 Notify_data.setM_duration(userData.getString("startTime"));
                                 Notify_data.setM_to(userData.getJSONObject("destinationAddress").getString("street"));
-                                Notify_data.setM_From(userData.getJSONObject("pickupAddress").getString("completeAddress"));
+                                Notify_data.setM_From(userData.getJSONObject("pickupAddress").getString("street"));
+                                Notify_data.setNoppl(userData.getString("numberOfPassenger"));
+                                Notify_data.setNobags (userData.getString("vi"));
+                                Notify_data.setInst(userData.getString("instructions"));
+                                Notify_data.setMiles (userData.getString("site"));
+                                Notify_data.setPrice(userData.getString("price"));
+                                Notify_data.setFlightNo(userData.getString("flightNo"));
+
+                                Notify_data.setBookingNo(userData.getString("prefixID"));
+                               // Notify_data.setPrice ("Not Allowed");
+                                Notify_data.setWarning_timer ("No Timer");
+                                Notify_data.setStart_time(userData.getString("startTime"));
+
+
+                                JSONArray viaAddres = userData.getJSONArray("viaAddress");
+
+                                if(viaAddres !=null)
+                                {
+                                    String street = "";
+
+                                    for (int i=0; i<viaAddres.length(); i++)
+                                    {
+                                        JSONObject viaObj = viaAddres.getJSONObject(i);
+                                        street = viaObj.getString("street");
+
+                                        Notify_data.viaAddress.add(street);
+                                        String lat = viaObj.getString("latitude");
+                                        String lng = viaObj.getString("longitude");
+
+                                            if(lat != null && !lat.equals("null") && lng != null && !lng.equals("null")) {
+                                                LatLng vialatlang = new LatLng(Double.parseDouble(lat),Double.parseDouble(lng));
+                                                Notify_data.viaLatLngArray.add(vialatlang);
+                                            }
+                                            else
+                                            {
+                                                closeProgressDialog();
+                                                AlertError();
+                                                return;
+                                            }
+
+
+                                    }
+                                }
+
+
+
+
+
                                 String value = userData.getJSONObject("pickupAddress").getString("latitude");
                                 if(value != null && !value.equals("null"))
                                 Notify_data.setLat_fr(Double.parseDouble(value));
@@ -1779,7 +2001,7 @@ return 0;
         update_bottom_shet(Notify_data, bottom_sheet);
         //closeProgressDialog();
 
-      //  update_bottom_shet(Notify_data, bottom_sheet);
+        update_bottom_dlg(Notify_data, getSheetLayout);
 
 
     }
@@ -1790,6 +2012,168 @@ return 0;
         navigationIntent.setPackage("com.google.android.apps.maps");
         startActivity(navigationIntent);
     }
+
+    public void resetJobSheet()
+    {
+        TextView mytext =  getSheetLayout.findViewById(R.id.text_cname);
+        mytext.setText("Waiting...");
+        mytext = getSheetLayout.findViewById(R.id.text_title);
+        mytext.setText("Waiting for Job ...");
+        mytext = getSheetLayout.findViewById(R.id.text_from);
+        mytext.setText("");
+        mytext = getSheetLayout.findViewById(R.id.text_to);
+        mytext.setText("");
+        mytext = getSheetLayout.findViewById(R.id.text_location);
+        mytext.setText("Waiting for job location ...");
+        mytext = getSheetLayout.findViewById(R.id.text_cphone);
+        mytext.setText("Waiting... ");
+        mytext = getSheetLayout.findViewById(R.id.text_duration);
+        mytext.setText("Waiting...");
+
+        mytext = getSheetLayout.findViewById(R.id.text_time);
+        mytext.setText("0:00");
+        mytext = getSheetLayout.findViewById(R.id.text_ppl);
+        mytext.setText("1");
+
+        mytext = getSheetLayout.findViewById(R.id.text_bags);
+        mytext.setText("0");
+
+
+        mytext = getSheetLayout.findViewById(R.id.text_inst);
+        mytext.setText("NA");
+
+        mytext = getSheetLayout.findViewById(R.id.text_miles);
+        mytext.setText("0");
+
+        mytext = getSheetLayout.findViewById(R.id.text_flightNo);
+        mytext.setText("");
+
+        mytext = getSheetLayout.findViewById(R.id.text_cost);
+        mytext.setText("0.00£");
+
+
+        btn_bottom_sheet.setText("Waiting Job");
+
+
+
+        btn_Accept_Ride.setVisibility(View.GONE);
+        btn_Reject_Ride.setVisibility(View.GONE);
+        btn_begin_Ride.setVisibility(View.GONE);
+        btn_bottom_sheet.setVisibility(View.VISIBLE);
+        btn_drv_arrived.setVisibility(View.GONE);
+        btn_no_show.setVisibility(View.GONE);
+        btn_POB.setVisibility(View.GONE);
+        btn_End_Ride.setVisibility(View.INVISIBLE);
+        btn_End_Ride.setVisibility(View.GONE);
+        btn_close_dlg.setVisibility(View.VISIBLE);
+        set_driver_status("ONLINE");
+        clearMapp();
+        if(timer !=null) {
+            timer.cancel();
+            TextView my_text = getSheetLayout.findViewById(R.id.text_timer);
+            my_text.setText("00:00");
+        }
+        btn_bottom_sheet.clearAnimation();
+        btn_bottom_sheet.setBackgroundColor(R.color.black);
+
+        bottomSheetDialog.dismiss();
+    }
+
+    public void loadridesummary(NotificationDataParser _data, View bSheet)
+    {
+        TextView mytext = bSheet.findViewById(R.id.text_from);
+        mytext.setText(_data.getM_From());
+        mytext = bSheet.findViewById(R.id.text_to);
+        mytext.setText(_data.getM_to());
+
+        mytext = bSheet.findViewById(R.id.text_ppl);
+        mytext.setText(Notify_data.getNoppl());
+
+        mytext = bSheet.findViewById(R.id.text_bags);
+        mytext.setText(Notify_data.getNobags());
+
+
+        mytext = bSheet.findViewById(R.id.text_inst);
+        mytext.setText(Notify_data.getInst());
+
+        mytext = bSheet.findViewById(R.id.text_miles);
+        mytext.setText(Notify_data.getMiles());
+
+        mytext = bSheet.findViewById(R.id.text_flightNo);
+        mytext.setText(Notify_data.getFlightNo());
+        mytext = bSheet.findViewById(R.id.text_cost);
+        mytext.setText(Notify_data.getPrice()+"£");
+
+
+    }
+    public void update_bottom_dlg(NotificationDataParser _data, View bSheet) {
+        TextView mytext = bSheet.findViewById(R.id.text_cname);
+        mytext.setText(_data.getCustomerName());
+        mytext = bSheet.findViewById(R.id.text_title);
+        mytext.setText(_data.getM_placeName());
+        mytext = bSheet.findViewById(R.id.text_from);
+        mytext.setText(_data.getM_From());
+        mytext = bSheet.findViewById(R.id.text_to);
+        mytext.setText(_data.getM_to());
+        mytext = bSheet.findViewById(R.id.text_location);
+        mytext.setText(_data.getM_From());
+        mytext = bSheet.findViewById(R.id.text_cphone);
+        mytext.setText(_data.getM_cPhone());
+        mytext = bSheet.findViewById(R.id.text_time);
+        mytext.setText(_data.getStart_time());
+        mytext = bSheet.findViewById(R.id.text_ppl);
+        mytext.setText(Notify_data.getNoppl());
+
+        mytext = bSheet.findViewById(R.id.text_bags);
+        mytext.setText(Notify_data.getNobags());
+
+
+        mytext = bSheet.findViewById(R.id.text_inst);
+        mytext.setText(Notify_data.getInst());
+
+        mytext = bSheet.findViewById(R.id.text_miles);
+        mytext.setText(Notify_data.getMiles());
+
+        mytext = bSheet.findViewById(R.id.text_flightNo);
+        mytext.setText(Notify_data.getFlightNo());
+
+        mytext = bSheet.findViewById(R.id.text_cost);
+        mytext.setText(Notify_data.getPrice()+"£");
+
+        TextView my_text = bSheet.findViewById(R.id.text_timer);
+         timer = new CountDown(30000, 1000,btn_bottom_sheet,this );
+        timer.start();
+        animate_button(btn_bottom_sheet);
+        btn_bottom_sheet.setText("+ New Job Arrived");
+        btn_Accept_Ride.setVisibility(View.VISIBLE);
+        btn_Reject_Ride.setVisibility(View.VISIBLE);
+        btn_close_dlg.setVisibility(View.GONE);
+
+
+
+
+    }
+
+
+    public  void animate_button(Button btnani)
+    {
+       /* final ObjectAnimator backgroundColorAnimator = ObjectAnimator.ofObject(btnani,
+                "backgroundColor",
+                new ArgbEvaluator(),
+                0xFFFFFFFF,
+                0xff78c5f9);
+        backgroundColorAnimator.setDuration(60000);
+        backgroundColorAnimator.start();*/
+
+        Animation anim = new AlphaAnimation(0.0f, 1.0f);
+        anim.setDuration(500); //You can manage the blinking time with this parameter
+        anim.setStartOffset(20);
+        anim.setRepeatMode(Animation.REVERSE);
+        anim.setRepeatCount(Animation.INFINITE);
+        btnani.startAnimation(anim);
+
+    }
+
     public void update_bottom_shet(NotificationDataParser _data, LinearLayout bSheet) {
         TextView mytext = bSheet.findViewById(R.id.text_cname);
         mytext.setText(_data.getCustomerName());
@@ -1803,10 +2187,22 @@ return 0;
         mytext.setText(_data.getM_From());
         mytext = bSheet.findViewById(R.id.text_cphone);
         mytext.setText(_data.getM_cPhone());
-      //  mytext = bSheet.findViewById(R.id.text_time);
-      //  mytext.setText(_data.getM_duration());
-      //  mytext = bSheet.findViewById(R.id.text_duration);
-      //  mytext.setText(Notify_data.getM_duration());
+        mytext = bSheet.findViewById(R.id.text_time);
+        mytext.setText(_data.getStart_time());
+        mytext = bSheet.findViewById(R.id.text_ppl);
+        mytext.setText(Notify_data.getNoppl());
+
+        mytext = bSheet.findViewById(R.id.text_bags);
+        mytext.setText(Notify_data.getNobags());
+
+
+        mytext = bSheet.findViewById(R.id.text_inst);
+        mytext.setText(Notify_data.getInst());
+
+        mytext = bSheet.findViewById(R.id.text_miles);
+        mytext.setText(Notify_data.getMiles());
+
+
 
         btn_bottom_sheet.setText("+ New Job Arrived");
         btn_Accept_Ride.setVisibility(View.VISIBLE);

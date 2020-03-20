@@ -21,6 +21,7 @@ public class CustomDialog  extends Dialog implements
     public Button yes, no, reject;
     ListItem Job;
     int dialogtype;
+    public boolean accepted = false;
 
     public CustomDialog(Activity a, ListItem jobdata, int type) {
         super(a);
@@ -30,7 +31,10 @@ public class CustomDialog  extends Dialog implements
         dialogtype = type;
     }
 
-
+public boolean isAccepted()
+{
+    return accepted;
+}
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,17 +78,21 @@ public class CustomDialog  extends Dialog implements
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.Btn_YES:
-                if(dialogtype==0)
-                sendMessageToActivity(Job.getBookingID(),3);  // we want to call jobfatch
-                else
-                    sendMessageToActivity(Job.getBookingID(),1); // we want to call accpet job update status
+                if(dialogtype==0) {
+                    sendMessageToActivity(Job.getBookingID(), 3);  // we want to call jobfatch
+                }
+                else {
+
+                    sendMessageToActivity(Job.getBookingID(), 1); // we want to call accpet job update status
+                    accepted = true;
+                }
 
                 dismiss();
                 break;
 
             case R.id.Btn_Reject:
                 sendMessageToActivity(Job.getBookingID(),0); // we want to call reject job
-
+                accepted = false;
                 break;
             case R.id.Btn_NO:
                 dismiss();

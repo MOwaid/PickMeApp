@@ -24,6 +24,7 @@ import com.ais.pickmecab.Constant;
 import com.ais.pickmecab.CustomDialog;
 import com.ais.pickmecab.CustomListAdapter;
 import com.ais.pickmecab.ListItem;
+import com.ais.pickmecab.ListItemComparator;
 import com.ais.pickmecab.MainActivity;
 import com.ais.pickmecab.R;
 import com.ais.pickmecab.SplashActivity;
@@ -43,6 +44,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Locale;
 
@@ -164,7 +166,7 @@ String DriverID = "";
 
 
              customer = job.getJSONObject("customer").getString("firstName");
-             from = job.getJSONObject("pickupAddress").getString("completeAddress");
+             from = job.getJSONObject("pickupAddress").getString("street");
              to = job.getJSONObject("destinationAddress").getString("street");
 
              BookingID = job.getString("id");
@@ -192,8 +194,16 @@ String DriverID = "";
     }
 
     private ArrayList getListAssignJobs() {
+        if(AssignedJobs.size()>1) {
+            Collections.sort(AssignedJobs, new ListItemComparator());
+          /*  ArrayList<ListItem> currentJobs;
+            currentJobs = new ArrayList<>();
+            currentJobs.add(AssignedJobs.get(0));*/
 
         return AssignedJobs;
+        }
+        else
+            return AssignedJobs;
     }
 
     public void showLoading()
@@ -208,7 +218,7 @@ String DriverID = "";
 
     public void fetchJob(String Driver_ID, String to, String from)
     {
-        String sURL = Constant.WEB_API_PATH+"bookings/driverBooking/"+Driver_ID;
+        String sURL = Constant.WEB_API_PATH+"bookings/driverBookingBystartTime/"+Driver_ID;
         showLoading();
 
         //"https://maps.googleapis.com/maps/api/geocode/json?address="+strAddress+"&key="+getString(R.string.API_KEY);

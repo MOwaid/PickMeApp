@@ -313,9 +313,9 @@ public class Login_Fragment extends Fragment implements OnClickListener {
         String getPassword = password.getText().toString();
 
         // Check patter for email id
-        Pattern p = Pattern.compile(Utils.regEx);
+       // Pattern p = Pattern.compile(Utils.regEx);
 
-        Matcher m = p.matcher(getEmailId);
+        //Matcher m = p.matcher(getEmailId);
 
         // Check for both field is empty or not
         if (getEmailId.equals("") || getEmailId.length() == 0
@@ -326,10 +326,10 @@ public class Login_Fragment extends Fragment implements OnClickListener {
 
         }
         // Check if email id is valid or not
-        else if (!m.find())
+       /* else if (!m.find())
             new CustomToast().Show_Toast(getActivity(), view,
                     "Your Email Id is Invalid.");
-            // Else do login and do your stuff
+            // Else do login and do your stuff*/
         else
             Toast.makeText(getActivity(), "Do Login.", Toast.LENGTH_SHORT)
                     .show();

@@ -3,6 +3,7 @@ package com.ais.pickmecab.ui.About;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -14,8 +15,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.ais.pickmecab.MainActivity;
 import com.ais.pickmecab.R;
 import com.ais.pickmecab.SplashActivity;
+import com.ais.pickmecab.ui.login.LoginActivity;
 
 import static com.ais.pickmecab.SplashActivity.editor;
 
@@ -43,6 +46,9 @@ public class AboutFragment extends Fragment {
         editor = SplashActivity.sh.edit();
         editor.clear();
         editor.commit();
+
         getActivity().finish();
+        Intent homepage = new Intent(getActivity().getApplicationContext(), LoginActivity.class);
+        startActivity(homepage);
     }
 }

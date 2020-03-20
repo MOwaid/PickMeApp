@@ -23,7 +23,7 @@
             android:title="@string/menu_slideshow" />
 
     </group>
-
+<!--
     <item android:title="Financials">
         <menu>
             <item
@@ -40,7 +40,7 @@
                 android:title="@string/menu_send" />
         </menu>
     </item>
-
+-->
     <item android:title="Controls">
         <menu>
             <item

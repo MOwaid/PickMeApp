@@ -111,6 +111,16 @@
                     android:text="Arrived"
                     android:textColor="#fff"
                     android:visibility="gone" />
+                <Button
+                    android:id="@+id/btn_drv_Via"
+                    android:layout_width="0.0dip"
+                    android:layout_height="fill_parent"
+
+                    android:layout_weight="1.0"
+                    android:background="#000"
+                    android:text="1 Stop Arrived"
+                    android:textColor="#fff"
+                    android:visibility="gone" />
 
                 <Button
                     android:id="@+id/btn_bottom_sheet"
